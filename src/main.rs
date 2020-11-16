@@ -1,7 +1,6 @@
 use clap::Clap;
-use std::{error, env, fs};
-use language_test::Token;
-use logos::Logos;
+use language_test::compile;
+use std::{env, error, fs};
 
 #[derive(Debug, Clone, Clap)]
 #[clap(version = "0.1.0", author = "jamesBeeProg <jamesBeeProg@gmail.com>")]
@@ -17,7 +16,7 @@ fn main() -> Result<()> {
     let input = env::current_dir()?.join(settings.input);
     let input = fs::read_to_string(input)?;
 
-    println!("{:#?}", Token::lexer(&input).collect::<Vec<_>>());
+    println!("{:#?}", compile(&input));
 
     Ok(())
 }

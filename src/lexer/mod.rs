@@ -1,9 +1,9 @@
-mod token;
-mod token_tree;
+pub mod token;
+pub mod token_tree;
 
 use logos::{Lexer, Logos};
 use token::Token;
-use token_tree::{Term, TokenTree};
+use token_tree::TokenTree;
 
 #[derive(Debug, Clone, Copy)]
 enum Lookout {
@@ -18,7 +18,7 @@ pub struct CompileResult {
     pub errors: Vec<&'static str>,
 }
 
-pub fn compile(input: &str) -> CompileResult {
+pub fn lex(input: &str) -> CompileResult {
     let mut input = Token::lexer(&input);
     convert(&mut input, Lookout::None)
 }
@@ -29,8 +29,8 @@ fn convert(input: &mut Lexer<Token>, lookout: Lookout) -> CompileResult {
 
     while let Some(token) = input.next() {
         output.push(match token {
-            Token::FuncKeyword => TokenTree::Term(Term::FuncKeyword),
-            Token::Arrow => TokenTree::Term(Term::Arrow),
+            Token::FuncKeyword => TokenTree::FuncKeyword,
+            Token::Arrow => TokenTree::Arrow,
             Token::Identifier(ident) => TokenTree::Identifier(ident),
             Token::NumberLiteral(num) => TokenTree::NumberLiteral(num),
             Token::Error => TokenTree::Error,

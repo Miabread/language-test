@@ -1,47 +1,9 @@
+mod token;
+mod token_tree;
+
 use logos::{Lexer, Logos};
-
-#[derive(Debug, Clone, PartialEq, Logos)]
-enum Token {
-    #[token("func")]
-    FuncKeyword,
-    #[token("->")]
-    Arrow,
-
-    #[regex("[a-zA-Z_][a-zA-Z0-9_]*", |t| t.slice().to_owned())]
-    Identifier(String),
-    #[regex("[+-]?[0-9]+", |t| t.slice().parse())]
-    NumberLiteral(i32),
-
-    #[token("(")]
-    OpenParen,
-    #[token(")")]
-    CloseParen,
-
-    #[token("{")]
-    OpenBrace,
-    #[token("}")]
-    CloseBrace,
-
-    #[error]
-    #[regex(r"[ \t\n\r\f]+", logos::skip)]
-    Error,
-}
-
-#[derive(Debug, Clone)]
-pub enum Term {
-    FuncKeyword,
-    Arrow,
-}
-
-#[derive(Debug, Clone)]
-pub enum TokenTree {
-    Term(Term),
-    Identifier(String),
-    NumberLiteral(i32),
-    Group(Vec<TokenTree>),
-    Block(Vec<TokenTree>),
-    Error,
-}
+use token::Token;
+use token_tree::{Term, TokenTree};
 
 #[derive(Debug, Clone, Copy)]
 enum Lookout {
@@ -62,8 +24,8 @@ pub fn compile(input: &str) -> CompileResult {
 }
 
 fn convert(input: &mut Lexer<Token>, lookout: Lookout) -> CompileResult {
-    let mut errors = Vec::new();
     let mut output = Vec::new();
+    let mut errors = Vec::new();
 
     while let Some(token) = input.next() {
         output.push(match token {

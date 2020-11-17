@@ -1,6 +1,6 @@
 use clap::Clap;
 use language_test::compile;
-use std::{env, error, fs};
+use std::{env, fs};
 
 #[derive(Debug, Clone, Clap)]
 #[clap(version = "0.1.0", author = "jamesBeeProg <jamesBeeProg@gmail.com>")]
@@ -8,15 +8,13 @@ struct Settings {
     input: String,
 }
 
-type Result<T, E = Box<dyn error::Error>> = std::result::Result<T, E>;
-
-fn main() -> Result<()> {
+fn main() {
     let settings = Settings::parse();
 
-    let input = env::current_dir()?.join(settings.input);
-    let input = fs::read_to_string(input)?;
+    let input = env::current_dir()
+        .expect("couldn't get current dir")
+        .join(settings.input);
+    let input = fs::read_to_string(input).expect("couldn't read source file");
 
     println!("{:#?}", compile(&input));
-
-    Ok(())
 }

@@ -16,5 +16,5 @@ fn main() {
         .join(settings.input);
     let input = fs::read_to_string(input).expect("couldn't read source file");
 
-    println!("{:#?}", compile(&input));
+    compile(&input);
 }

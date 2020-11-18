@@ -1,3 +1,4 @@
+mod codegen;
 mod lexer;
 mod parser;
 
@@ -11,10 +12,21 @@ pub fn compile(input: &str) {
         }
     }
 
-    let results = parser::parse(results.output);
+    let results = match parser::parse(results.output) {
+        Err(error) => {
+            println!("Error during parse phase: {}", error);
+            return;
+        }
+        Ok(results) => results,
+    };
 
-    match results {
-        Ok((name, number)) => println!("name: {}, number: {}", name, number),
-        Err(error) => println!("Error during parse phase: {}", error),
-    }
+    let results = match codegen::codegen(results) {
+        Err(error) => {
+            println!("Error during codegen phase: {}", error);
+            return;
+        }
+        Ok(results) => results,
+    };
+
+    println!("{:?}", results);
 }

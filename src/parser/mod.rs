@@ -2,7 +2,7 @@ use crate::lexer::token_tree::{TokenTree, TokenTreeType};
 use thiserror::Error;
 use ParserError::*;
 
-#[derive(Error, Debug)]
+#[derive(Debug, Clone, Error)]
 pub enum ParserError {
     #[error("invalid token (expected {expected:?}, found {found:?})")]
     InvalidToken {
@@ -15,6 +15,12 @@ pub enum ParserError {
     InvalidTrailingTokens { found: TokenTree },
     #[error("all types must be I32 for now")]
     TypeError,
+}
+
+#[derive(Debug, Clone)]
+pub struct ParseResult {
+    pub name: String,
+    pub body: i32,
 }
 
 macro_rules! next_token {
@@ -31,7 +37,7 @@ macro_rules! end_tokens {
     };
 }
 
-pub fn parse(input: Vec<TokenTree>) -> Result<(String, i32), ParserError> {
+pub fn parse(input: Vec<TokenTree>) -> Result<ParseResult, ParserError> {
     let mut input = input.into_iter();
 
     next_token!(input, |it| it.expect_func_keyword())?;
@@ -48,10 +54,10 @@ pub fn parse(input: Vec<TokenTree>) -> Result<(String, i32), ParserError> {
 
     let mut block = next_token!(input, |it| it.expect_block())?.into_iter();
 
-    let number = next_token!(block, |it| it.expect_number_literal())?;
+    let body = next_token!(block, |it| it.expect_number_literal())?;
 
     end_tokens!(block);
     end_tokens!(input);
 
-    Ok((name, number))
+    Ok(ParseResult { name, body })
 }

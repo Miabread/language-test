@@ -1,5 +1,5 @@
 extern "C" {
-    fn foobar() -> i32;
+    pub fn foobar() -> i32;
 }
 
 fn main() {

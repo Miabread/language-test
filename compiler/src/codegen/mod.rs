@@ -6,7 +6,7 @@ use {
     thiserror::Error,
 };
 
-pub fn codegen(input: ParseResult) -> Result<Vec<u8>, BackendError> {
+pub fn codegen(input: ParseResult) -> Result<Vec<u8>, CodegenError> {
     // Create a module using host configuation
     let mut module = {
         let isa =
@@ -55,7 +55,7 @@ pub fn codegen(input: ParseResult) -> Result<Vec<u8>, BackendError> {
 }
 
 #[derive(Debug, Error)]
-pub enum BackendError {
+pub enum CodegenError {
     #[error("Failed to lookup instruction set")]
     Lookup(#[from] cranelift::codegen::isa::LookupError),
     #[error("Error while using cranelift Module")]

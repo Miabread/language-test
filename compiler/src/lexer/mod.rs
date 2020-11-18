@@ -2,8 +2,10 @@ pub mod token;
 pub mod token_tree;
 
 use logos::{Lexer, Logos};
+use thiserror::Error;
 use token::Token;
 use token_tree::TokenTree;
+use LexerError::*;
 
 #[derive(Debug, Clone, Copy)]
 enum Lookout {
@@ -15,7 +17,7 @@ enum Lookout {
 #[derive(Debug, Clone)]
 pub struct CompileResult {
     pub output: Vec<TokenTree>,
-    pub errors: Vec<&'static str>,
+    pub errors: Vec<LexerError>,
 }
 
 pub fn lex(input: &str) -> CompileResult {
@@ -45,8 +47,8 @@ fn convert(input: &mut Lexer<Token>, lookout: Lookout) -> CompileResult {
                 if let Lookout::Paren = lookout {
                     break;
                 } else {
-                    errors.push("unmatched paren");
-                    continue;
+                    errors.push(UnmatchedParen);
+                    break;
                 }
             }
 
@@ -60,12 +62,22 @@ fn convert(input: &mut Lexer<Token>, lookout: Lookout) -> CompileResult {
                 if let Lookout::Brace = lookout {
                     break;
                 } else {
-                    errors.push("unmatched brace");
-                    continue;
+                    errors.push(UnmatchedBrace);
+                    break;
                 }
             }
         })
     }
 
     CompileResult { output, errors }
+}
+
+#[derive(Debug, Clone, Error)]
+pub enum LexerError {
+    #[error("unmatched paren")]
+    UnmatchedParen,
+    #[error("unmatched brace")]
+    UnmatchedBrace,
+    #[error("unclosed at end")]
+    Unclosed,
 }

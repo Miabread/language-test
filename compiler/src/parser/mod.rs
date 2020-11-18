@@ -2,21 +2,6 @@ use crate::lexer::token_tree::{TokenTree, TokenTreeType};
 use thiserror::Error;
 use ParserError::*;
 
-#[derive(Debug, Clone, Error)]
-pub enum ParserError {
-    #[error("invalid token (expected {expected:?}, found {found:?})")]
-    InvalidToken {
-        expected: TokenTreeType,
-        found: TokenTree,
-    },
-    #[error("unexpected end of file")]
-    InvalidEndOfFile,
-    #[error("unexpected trailing token: {found:?}")]
-    InvalidTrailingTokens { found: TokenTree },
-    #[error("all types must be I32 for now")]
-    TypeError,
-}
-
 #[derive(Debug, Clone)]
 pub struct ParseResult {
     pub name: String,
@@ -60,4 +45,19 @@ pub fn parse(input: Vec<TokenTree>) -> Result<ParseResult, ParserError> {
     end_tokens!(input);
 
     Ok(ParseResult { name, body })
+}
+
+#[derive(Debug, Clone, Error)]
+pub enum ParserError {
+    #[error("invalid token (expected {expected:?}, found {found:?})")]
+    InvalidToken {
+        expected: TokenTreeType,
+        found: TokenTree,
+    },
+    #[error("unexpected end of file")]
+    InvalidEndOfFile,
+    #[error("unexpected trailing token: {found:?}")]
+    InvalidTrailingTokens { found: TokenTree },
+    #[error("all types must be I32 for now")]
+    TypeError,
 }

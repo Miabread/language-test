@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cargo run indev/input.son
+cargo run --bin language-test-compiler indev/input.son

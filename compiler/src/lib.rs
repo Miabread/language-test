@@ -2,31 +2,27 @@ mod codegen;
 mod lexer;
 mod parser;
 
-pub fn compile(input: &str) {
-    let results = lexer::lex(input);
+use thiserror::Error;
+
+pub fn compile(input: &str) -> Result<Vec<u8>, CompilerError> {
+    let results = dbg!(lexer::lex(input));
 
     if !results.errors.is_empty() {
-        println!("Error durring lexing phase:");
-        for error in results.errors {
-            println!("{}", error);
-        }
+        return Err(CompilerError::Lex(results.errors));
     }
 
-    let results = match parser::parse(results.output) {
-        Err(error) => {
-            println!("Error during parse phase: {}", error);
-            return;
-        }
-        Ok(results) => results,
-    };
+    let results = parser::parse(results.output)?;
+    let results = codegen::codegen(results)?;
 
-    let results = match codegen::codegen(results) {
-        Err(error) => {
-            println!("Error during codegen phase: {}", error);
-            return;
-        }
-        Ok(results) => results,
-    };
+    Ok(results)
+}
 
-    println!("{:?}", results);
+#[derive(Debug, Error)]
+pub enum CompilerError {
+    #[error("Error during lexing phase")]
+    Lex(Vec<lexer::LexerError>),
+    #[error("Error during parsing phase")]
+    Parse(#[from] parser::ParserError),
+    #[error("Error during codegen phase")]
+    Codegen(#[from] codegen::CodegenError),
 }

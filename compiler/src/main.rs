@@ -1,5 +1,5 @@
 use clap::Clap;
-use language_test::compile;
+use language_test_compiler::compile;
 use std::{env, fs};
 
 #[derive(Debug, Clone, Clap)]

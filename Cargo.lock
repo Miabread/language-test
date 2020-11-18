@@ -232,7 +232,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "language-test"
+name = "language-test-compiler"
 version = "0.1.0"
 dependencies = [
  "clap",
@@ -243,6 +243,10 @@ dependencies = [
  "target-lexicon",
  "thiserror",
 ]
+
+[[package]]
+name = "language-test-library"
+version = "0.1.0"
 
 [[package]]
 name = "lazy_static"

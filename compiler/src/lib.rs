@@ -5,7 +5,7 @@ mod parser;
 use thiserror::Error;
 
 pub fn compile(input: &str) -> Result<Vec<u8>, CompilerError> {
-    let results = dbg!(lexer::lex(input));
+    let results = lexer::lex(input);
 
     if !results.errors.is_empty() {
         return Err(CompilerError::Lex(results.errors));

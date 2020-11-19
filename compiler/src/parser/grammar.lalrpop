@@ -7,7 +7,9 @@ match {
     r"//[^\n\r]*[\n\r]*" => { },
     r"/\*([^\*]*\*+[^\*/])*([^\*]*\*+|[^\*])*\*/" => { },
 } else {
-    "func", "->",
+    "func", "import", "external", // Keywords
+
+    "->", ";", // Symbols
 
     "(", ")", "{", "}", // Parens
 
@@ -40,7 +42,10 @@ pub File: File = <items: Item*> => File { <> };
 
 Item: Item = {
     Function => Item::Function(<>),
+    Import => Item::Import(<>),
 }
+
+Import: Import = "import" "external" "{" <signatures: (<FunctionSignature> ";")*> "}" => Import { <> };
 
 Function: Function = <signature: FunctionSignature>"{" <body: Expression> "}" => Function { <> };
 

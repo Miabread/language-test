@@ -24,12 +24,14 @@ impl parser::File {
 #[derive(Debug, Clone)]
 pub enum PartialItem {
     Function(PartialFunction),
+    Import(Import),
 }
 
 impl parser::Item {
     pub fn visit_semantic(self) -> Result<PartialItem, SemanticError> {
         Ok(match self {
             Self::Function(func) => PartialItem::Function(func.visit_semantic()?),
+            Self::Import(import) => PartialItem::Import(import.visit_semantic()?),
         })
     }
 }
@@ -49,6 +51,23 @@ impl parser::FunctionSignature {
         Ok(FunctionSignature {
             name: self.name,
             return_ty: self.return_ty,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Import {
+    pub signatures: Vec<FunctionSignature>,
+}
+
+impl parser::Import {
+    pub fn visit_semantic(self) -> Result<Import, SemanticError> {
+        Ok(Import {
+            signatures: self
+                .signatures
+                .into_iter()
+                .map(|it| it.visit_semantic())
+                .collect::<Result<Vec<_>, _>>()?,
         })
     }
 }
@@ -88,12 +107,14 @@ impl PartialFile {
 #[derive(Debug, Clone)]
 pub enum Item {
     Function(Function),
+    Import(Import),
 }
 
 impl PartialItem {
     pub fn visit_semantic(self) -> Result<Item, SemanticError> {
         Ok(match self {
             Self::Function(func) => Item::Function(func.visit_semantic()?),
+            Self::Import(import) => Item::Import(import),
         })
     }
 }

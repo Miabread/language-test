@@ -14,12 +14,18 @@ pub struct File {
 #[derive(Debug, Clone)]
 pub enum Item {
     Function(Function),
+    Import(Import),
 }
 
 #[derive(Debug, Clone)]
 pub struct FunctionSignature {
     pub name: String,
     pub return_ty: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct Import {
+    pub signatures: Vec<FunctionSignature>,
 }
 
 #[derive(Debug, Clone)]

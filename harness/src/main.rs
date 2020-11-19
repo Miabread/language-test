@@ -1,13 +1,14 @@
 extern "C" {
-    pub fn foo() -> i32;
-    pub fn bar() -> i32;
-    pub fn baz() -> i32;
+    pub fn foobar() -> i32;
 }
 
 fn main() {
     unsafe {
-        println!("{}", foo());
-        println!("{}", bar());
-        println!("{}", baz());
+        println!("{}", foobar());
     }
+}
+
+#[no_mangle]
+pub extern "C" fn test() -> i32 {
+    123
 }

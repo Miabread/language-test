@@ -35,6 +35,7 @@ impl semantic::Item {
     pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
         match self {
             Self::Function(func) => func.visit_codegen(module)?,
+            Self::Import(import) => import.visit_codegen(module)?,
         }
 
         Ok(())
@@ -55,6 +56,17 @@ impl semantic::FunctionSignature {
 
         let id = module.declare_function(&self.name, Linkage::Export, &context.func.signature)?;
         Ok(id)
+    }
+}
+
+impl semantic::Import {
+    pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
+        let mut context = module.make_context();
+        for signature in self.signatures {
+            signature.visit_codegen(module, &mut context)?;
+            context.clear();
+        }
+        Ok(())
     }
 }
 

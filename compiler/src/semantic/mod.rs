@@ -5,6 +5,36 @@ use thiserror::Error;
 use SemanticError::*;
 
 #[derive(Debug, Clone)]
+pub struct PartialFile {
+    pub items: Vec<PartialItem>,
+}
+
+impl parser::File {
+    pub fn visit_semantic(self) -> Result<PartialFile, SemanticError> {
+        Ok(PartialFile {
+            items: self
+                .items
+                .into_iter()
+                .map(|it| it.visit_semantic())
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum PartialItem {
+    Function(PartialFunction),
+}
+
+impl parser::Item {
+    pub fn visit_semantic(self) -> Result<PartialItem, SemanticError> {
+        Ok(match self {
+            Self::Function(func) => PartialItem::Function(func.visit_semantic()?),
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct FunctionSignature {
     pub name: String,
     pub return_ty: String,
@@ -23,6 +53,7 @@ impl parser::FunctionSignature {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct PartialFunction {
     pub signature: FunctionSignature,
     pub partial_body: parser::Expression,
@@ -33,6 +64,36 @@ impl parser::Function {
         Ok(PartialFunction {
             signature: self.signature.visit_semantic()?,
             partial_body: self.body,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct File {
+    pub items: Vec<Item>,
+}
+
+impl PartialFile {
+    pub fn visit_semantic(self) -> Result<File, SemanticError> {
+        Ok(File {
+            items: self
+                .items
+                .into_iter()
+                .map(|it| it.visit_semantic())
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum Item {
+    Function(Function),
+}
+
+impl PartialItem {
+    pub fn visit_semantic(self) -> Result<Item, SemanticError> {
+        Ok(match self {
+            Self::Function(func) => Item::Function(func.visit_semantic()?),
         })
     }
 }
@@ -65,7 +126,7 @@ impl parser::Expression {
     }
 }
 
-pub fn visit_semantic(input: parser::Function) -> Result<Function, SemanticError> {
+pub fn visit_semantic(input: parser::File) -> Result<File, SemanticError> {
     input.visit_semantic()?.visit_semantic()
 }
 

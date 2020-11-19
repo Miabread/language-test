@@ -1,9 +1,19 @@
 lalrpop_mod!(#[allow(clippy::all)] pub grammar, "/parser/grammar.rs");
 
-pub fn parse(input: &str) -> Result<Function, String> {
-    grammar::FunctionParser::new()
+pub fn parse(input: &str) -> Result<File, String> {
+    grammar::FileParser::new()
         .parse(input)
         .map_err(|e| format!("{:?}", e))
+}
+
+#[derive(Debug, Clone)]
+pub struct File {
+    pub items: Vec<Item>,
+}
+
+#[derive(Debug, Clone)]
+pub enum Item {
+    Function(Function),
 }
 
 #[derive(Debug, Clone)]

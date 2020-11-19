@@ -4,15 +4,47 @@ use cranelift_module::FuncId;
 use {
     crate::semantic,
     cranelift::{codegen::binemit::NullTrapSink, prelude::*},
-    cranelift_module::{Linkage, Module},
-    cranelift_object::{ObjectBackend, ObjectBuilder},
+    cranelift_module::Linkage,
+    cranelift_object::ObjectBuilder,
     thiserror::Error,
 };
+
+type Module = cranelift_module::Module<cranelift_object::ObjectBackend>;
+
+impl semantic::File {
+    pub fn visit_codegen(self) -> Result<Vec<u8>, CodegenError> {
+        // Create a module using host configuration
+        let isa =
+            isa::lookup(target_lexicon::HOST)?.finish(settings::Flags::new(settings::builder()));
+        let builder =
+            ObjectBuilder::new(isa, "sonance", cranelift_module::default_libcall_names())?;
+        let mut module = Module::new(builder);
+
+        for item in self.items {
+            item.visit_codegen(&mut module)?;
+        }
+
+        module.finalize_definitions();
+
+        // Return bytecode
+        Ok(module.finish().emit()?)
+    }
+}
+
+impl semantic::Item {
+    pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
+        match self {
+            Self::Function(func) => func.visit_codegen(module)?,
+        }
+
+        Ok(())
+    }
+}
 
 impl semantic::FunctionSignature {
     pub fn visit_codegen(
         self,
-        module: &mut Module<ObjectBackend>,
+        module: &mut Module,
         context: &mut Context,
     ) -> Result<FuncId, CodegenError> {
         context
@@ -27,7 +59,7 @@ impl semantic::FunctionSignature {
 }
 
 impl semantic::Function {
-    pub fn visit_codegen(self, module: &mut Module<ObjectBackend>) -> Result<(), CodegenError> {
+    pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
         let mut context = module.make_context();
         let mut builder_context = FunctionBuilderContext::new();
 
@@ -64,18 +96,8 @@ impl semantic::Expression {
     }
 }
 
-pub fn codegen(input: semantic::Function) -> Result<Vec<u8>, CodegenError> {
-    // Create a module using host configuration
-    let isa = isa::lookup(target_lexicon::HOST)?.finish(settings::Flags::new(settings::builder()));
-    let builder = ObjectBuilder::new(isa, "sonance", cranelift_module::default_libcall_names())?;
-    let mut module = Module::<ObjectBackend>::new(builder);
-
-    // Codegen the function
-    input.visit_codegen(&mut module)?;
-    module.finalize_definitions();
-
-    // Return bytecode
-    Ok(module.finish().emit()?)
+pub fn codegen(input: semantic::File) -> Result<Vec<u8>, CodegenError> {
+    input.visit_codegen()
 }
 
 #[derive(Debug, Error)]

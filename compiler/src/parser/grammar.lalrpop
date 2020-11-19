@@ -36,7 +36,13 @@ List<T, S>: Vec<T> = {
 #[inline]
 Identifier: String = IDENTIFIER => <>.to_owned();
 
-pub Function: Function = <signature: FunctionSignature>"{" <body: Expression> "}" => Function { <> };
+pub File: File = <items: Item*> => File { <> };
+
+Item: Item = {
+    Function => Item::Function(<>),
+}
+
+Function: Function = <signature: FunctionSignature>"{" <body: Expression> "}" => Function { <> };
 
 FunctionSignature: FunctionSignature = "func" <name: Identifier> "(" ")" "->" <return_ty: Identifier> => FunctionSignature { <> };
 

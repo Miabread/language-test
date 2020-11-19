@@ -1,3 +1,6 @@
+use cranelift::codegen::Context;
+use cranelift_module::FuncId;
+
 use {
     crate::semantic,
     cranelift::{codegen::binemit::NullTrapSink, prelude::*},
@@ -6,28 +9,30 @@ use {
     thiserror::Error,
 };
 
-pub fn codegen(input: semantic::Function) -> Result<Vec<u8>, CodegenError> {
-    // Create a module using host configuation
-    let mut module = {
-        let isa =
-            isa::lookup(target_lexicon::HOST)?.finish(settings::Flags::new(settings::builder()));
-        let builder =
-            ObjectBuilder::new(isa, "sonance", cranelift_module::default_libcall_names())?;
-        Module::<ObjectBackend>::new(builder)
-    };
+impl semantic::FunctionSignature {
+    pub fn visit_codegen(
+        self,
+        module: &mut Module<ObjectBackend>,
+        context: &mut Context,
+    ) -> Result<FuncId, CodegenError> {
+        context
+            .func
+            .signature
+            .returns
+            .push(AbiParam::new(types::I32));
 
-    // Context objects
-    let mut context = module.make_context();
-    let mut builder_context = FunctionBuilderContext::new();
+        let id = module.declare_function(&self.name, Linkage::Export, &context.func.signature)?;
+        Ok(id)
+    }
+}
 
-    // Create a function signature and attach it
-    let mut signature = module.make_signature();
-    signature.returns.push(AbiParam::new(types::I32));
-    let id = module.declare_function(&input.signature.name, Linkage::Export, &signature)?;
-    context.func.signature = signature;
+impl semantic::Function {
+    pub fn visit_codegen(self, module: &mut Module<ObjectBackend>) -> Result<(), CodegenError> {
+        let mut context = module.make_context();
+        let mut builder_context = FunctionBuilderContext::new();
 
-    // Build the function
-    {
+        // Setup signature and function builder
+        let id = self.signature.visit_codegen(module, &mut context)?;
         let mut builder = FunctionBuilder::new(&mut context.func, &mut builder_context);
 
         // Setup the EBB
@@ -37,17 +42,36 @@ pub fn codegen(input: semantic::Function) -> Result<Vec<u8>, CodegenError> {
         builder.seal_block(block);
 
         // Fill in a const and ret instruction
-        let result = builder.ins().iconst(types::I32, input.body as i64);
+        let result = self.body.visit_codegen(&mut builder)?;
         builder.ins().return_(&[result]);
 
-        // Finialize the EBB
+        // Finalize the EBB
         builder.seal_all_blocks();
         builder.finalize();
-    }
 
-    // Finialize the function
-    module.define_function(id, &mut context, &mut NullTrapSink {})?;
-    module.clear_context(&mut context);
+        // Finalize the function
+        module.define_function(id, &mut context, &mut NullTrapSink {})?;
+
+        Ok(())
+    }
+}
+
+impl semantic::Expression {
+    pub fn visit_codegen(self, builder: &mut FunctionBuilder) -> Result<Value, CodegenError> {
+        Ok(match self {
+            Self::Literal(num) => builder.ins().iconst(types::I32, num as i64),
+        })
+    }
+}
+
+pub fn codegen(input: semantic::Function) -> Result<Vec<u8>, CodegenError> {
+    // Create a module using host configuration
+    let isa = isa::lookup(target_lexicon::HOST)?.finish(settings::Flags::new(settings::builder()));
+    let builder = ObjectBuilder::new(isa, "sonance", cranelift_module::default_libcall_names())?;
+    let mut module = Module::<ObjectBackend>::new(builder);
+
+    // Codegen the function
+    input.visit_codegen(&mut module)?;
     module.finalize_definitions();
 
     // Return bytecode

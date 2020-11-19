@@ -10,24 +10,63 @@ pub struct FunctionSignature {
     pub return_ty: String,
 }
 
+impl parser::FunctionSignature {
+    pub fn visit_semantic(self) -> Result<FunctionSignature, SemanticError> {
+        if self.return_ty != "I32" {
+            return Err(JustI32);
+        }
+
+        Ok(FunctionSignature {
+            name: self.name,
+            return_ty: self.return_ty,
+        })
+    }
+}
+
+pub struct PartialFunction {
+    pub signature: FunctionSignature,
+    pub partial_body: parser::Expression,
+}
+
+impl parser::Function {
+    pub fn visit_semantic(self) -> Result<PartialFunction, SemanticError> {
+        Ok(PartialFunction {
+            signature: self.signature.visit_semantic()?,
+            partial_body: self.body,
+        })
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Function {
     pub signature: FunctionSignature,
-    pub body: i32,
+    pub body: Expression,
 }
 
-pub fn semanticize(input: parser::Function) -> Result<Function, SemanticError> {
-    if input.return_ty != "I32" {
-        return Err(JustI32);
+impl PartialFunction {
+    pub fn visit_semantic(self) -> Result<Function, SemanticError> {
+        Ok(Function {
+            signature: self.signature,
+            body: self.partial_body.visit_semantic()?,
+        })
     }
+}
 
-    Ok(Function {
-        signature: FunctionSignature {
-            name: input.name,
-            return_ty: input.return_ty,
-        },
-        body: input.body,
-    })
+#[derive(Debug, Clone)]
+pub enum Expression {
+    Literal(i32),
+}
+
+impl parser::Expression {
+    pub fn visit_semantic(self) -> Result<Expression, SemanticError> {
+        Ok(match self {
+            Self::Literal(num) => Expression::Literal(num),
+        })
+    }
+}
+
+pub fn visit_semantic(input: parser::Function) -> Result<Function, SemanticError> {
+    input.visit_semantic()?.visit_semantic()
 }
 
 #[derive(Debug, Clone, Error)]

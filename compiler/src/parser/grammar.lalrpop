@@ -33,8 +33,15 @@ List<T, S>: Vec<T> = {
     }
 };
 
-pub Function: Function = "func" <name: Identifier> "(" ")" "->" <return_ty: Identifier> "{" <body: Literal> "}" => Function { <> };
-
+#[inline]
 Identifier: String = IDENTIFIER => <>.to_owned();
+
+pub Function: Function = <signature: FunctionSignature>"{" <body: Expression> "}" => Function { <> };
+
+FunctionSignature: FunctionSignature = "func" <name: Identifier> "(" ")" "->" <return_ty: Identifier> => FunctionSignature { <> };
+
+Expression: Expression = {
+    Literal => Expression::Literal(<>),
+}
 
 Literal: i32 = INT_LITERAL => i32::from_str(<>).unwrap();

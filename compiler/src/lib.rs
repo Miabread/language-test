@@ -10,7 +10,7 @@ use CompilerError::*;
 
 pub fn compile(input: &str) -> Result<Vec<u8>, CompilerError> {
     let results = parser::parse(input).map_err(Parse)?;
-    let results = semantic::semanticize(results)?;
+    let results = semantic::visit_semantic(results)?;
     let results = codegen::codegen(results)?;
 
     Ok(results)

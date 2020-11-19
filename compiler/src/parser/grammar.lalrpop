@@ -33,7 +33,7 @@ List<T, S>: Vec<T> = {
     }
 };
 
-pub Function: Function = "func" <name: Identifier> "(" ")" "->" <ty: Identifier> "{" <body: Literal> "}" => Function { <> };
+pub Function: Function = "func" <name: Identifier> "(" ")" "->" <return_ty: Identifier> "{" <body: Literal> "}" => Function { <> };
 
 Identifier: String = IDENTIFIER => <>.to_owned();
 

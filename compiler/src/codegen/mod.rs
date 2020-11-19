@@ -1,12 +1,12 @@
 use {
-    crate::parser,
+    crate::semantic,
     cranelift::{codegen::binemit::NullTrapSink, prelude::*},
     cranelift_module::{Linkage, Module},
     cranelift_object::{ObjectBackend, ObjectBuilder},
     thiserror::Error,
 };
 
-pub fn codegen(input: parser::Function) -> Result<Vec<u8>, CodegenError> {
+pub fn codegen(input: semantic::Function) -> Result<Vec<u8>, CodegenError> {
     // Create a module using host configuation
     let mut module = {
         let isa =
@@ -23,7 +23,7 @@ pub fn codegen(input: parser::Function) -> Result<Vec<u8>, CodegenError> {
     // Create a function signature and attach it
     let mut signature = module.make_signature();
     signature.returns.push(AbiParam::new(types::I32));
-    let id = module.declare_function(&input.name, Linkage::Export, &signature)?;
+    let id = module.declare_function(&input.signature.name, Linkage::Export, &signature)?;
     context.func.signature = signature;
 
     // Build the function

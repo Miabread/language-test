@@ -1,17 +1,14 @@
+#[macro_use]
+extern crate lalrpop_util;
+
 mod codegen;
-mod lexer;
 mod parser;
 
 use thiserror::Error;
+use CompilerError::*;
 
 pub fn compile(input: &str) -> Result<Vec<u8>, CompilerError> {
-    let results = lexer::lex(input);
-
-    if !results.errors.is_empty() {
-        return Err(CompilerError::Lex(results.errors));
-    }
-
-    let results = parser::parse(results.output)?;
+    let results = parser::parse(input).map_err(Parse)?;
     let results = codegen::codegen(results)?;
 
     Ok(results)
@@ -19,10 +16,8 @@ pub fn compile(input: &str) -> Result<Vec<u8>, CompilerError> {
 
 #[derive(Debug, Error)]
 pub enum CompilerError {
-    #[error("Error during lexing phase")]
-    Lex(Vec<lexer::LexerError>),
-    #[error("Error during parsing phase")]
-    Parse(#[from] parser::ParserError),
-    #[error("Error during codegen phase")]
+    #[error("Error during parsing phase:\n{0}")]
+    Parse(String),
+    #[error("Error during codegen phase:\n{0}")]
     Codegen(#[from] codegen::CodegenError),
 }

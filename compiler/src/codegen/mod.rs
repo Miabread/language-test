@@ -1,12 +1,12 @@
 use {
-    crate::parser::ParseResult,
+    crate::parser,
     cranelift::{codegen::binemit::NullTrapSink, prelude::*},
     cranelift_module::{Linkage, Module},
     cranelift_object::{ObjectBackend, ObjectBuilder},
     thiserror::Error,
 };
 
-pub fn codegen(input: ParseResult) -> Result<Vec<u8>, CodegenError> {
+pub fn codegen(input: parser::Function) -> Result<Vec<u8>, CodegenError> {
     // Create a module using host configuation
     let mut module = {
         let isa =

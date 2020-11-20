@@ -1,5 +1,3 @@
-pub mod symbol_table;
-
 use crate::parser;
 use thiserror::Error;
 use SemanticError::*;

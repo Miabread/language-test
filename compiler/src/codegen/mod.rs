@@ -1,15 +1,13 @@
-use cranelift::codegen::Context;
-use cranelift_module::FuncId;
-
 use {
     crate::semantic,
-    cranelift::{codegen::binemit::NullTrapSink, prelude::*},
-    cranelift_module::Linkage,
-    cranelift_object::ObjectBuilder,
+    cranelift::{
+        codegen::{binemit::NullTrapSink, Context},
+        prelude::*,
+    },
+    cranelift_module::{FuncId, Linkage, Module},
+    cranelift_object::{ObjectBuilder, ObjectModule},
     thiserror::Error,
 };
-
-type Module = cranelift_module::Module<cranelift_object::ObjectBackend>;
 
 impl semantic::File {
     pub fn visit_codegen(self) -> Result<Vec<u8>, CodegenError> {
@@ -18,13 +16,11 @@ impl semantic::File {
             isa::lookup(target_lexicon::HOST)?.finish(settings::Flags::new(settings::builder()));
         let builder =
             ObjectBuilder::new(isa, "sonance", cranelift_module::default_libcall_names())?;
-        let mut module = Module::new(builder);
+        let mut module = ObjectModule::new(builder);
 
         for item in self.items {
             item.visit_codegen(&mut module)?;
         }
-
-        module.finalize_definitions();
 
         // Return bytecode
         Ok(module.finish().emit()?)
@@ -32,7 +28,7 @@ impl semantic::File {
 }
 
 impl semantic::Item {
-    pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
+    pub fn visit_codegen(self, module: &mut ObjectModule) -> Result<(), CodegenError> {
         match self {
             Self::Function(func) => func.visit_codegen(module)?,
             Self::Import(import) => import.visit_codegen(module)?,
@@ -45,7 +41,7 @@ impl semantic::Item {
 impl semantic::FunctionSignature {
     pub fn visit_codegen(
         self,
-        module: &mut Module,
+        module: &mut ObjectModule,
         context: &mut Context,
     ) -> Result<FuncId, CodegenError> {
         context
@@ -60,7 +56,7 @@ impl semantic::FunctionSignature {
 }
 
 impl semantic::Import {
-    pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
+    pub fn visit_codegen(self, module: &mut ObjectModule) -> Result<(), CodegenError> {
         let mut context = module.make_context();
         for signature in self.signatures {
             signature.visit_codegen(module, &mut context)?;
@@ -71,7 +67,7 @@ impl semantic::Import {
 }
 
 impl semantic::Function {
-    pub fn visit_codegen(self, module: &mut Module) -> Result<(), CodegenError> {
+    pub fn visit_codegen(self, module: &mut ObjectModule) -> Result<(), CodegenError> {
         let mut context = module.make_context();
         let mut builder_context = FunctionBuilderContext::new();
 

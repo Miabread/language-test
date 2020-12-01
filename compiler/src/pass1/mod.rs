@@ -3,52 +3,76 @@ pub mod data;
 
 use super::parser;
 pub use data::{File, *};
-use std::collections::HashMap;
 use thiserror::Error;
 use Pass1Error::*;
 
-pub fn pass1(input: parser::File) -> Result<File, Pass1Error> {
-    let mut types = HashMap::new();
-    let mut functions = Vec::new();
+impl parser::File {
+    fn pass1(self) -> Result<File, Pass1Error> {
+        let mut context = File::default();
 
-    for item in input.items {
-        match item {
-            Item::Function(func) => functions.push(FunctionItem::Normal(func)),
-            Item::ImportExtern(ImportExtern { items, protocol }) => {
-                for item in items {
-                    match item {
-                        ExternItem::Function(signature) => {
-                            functions.push(FunctionItem::Extern(ExternFunction {
-                                signature,
-                                protocol: protocol.clone(),
-                            }))
-                        }
-                        ExternItem::Type(name) => {
-                            if types.contains_key(&name) {
-                                return Err(TypeAlreadyExists { name });
-                            }
+        for item in self.items {
+            item.pass1(&mut context)?;
+        }
 
-                            if protocol != "builtin" {
-                                return Err(RealExternTypeNotSupported { name, protocol });
-                            }
+        Ok(context)
+    }
+}
 
-                            match &name[..] {
-                                "Integer" => {
-                                    types.insert(name, Type::Integer);
-                                }
-                                "Float" => {
-                                    types.insert(name, Type::Float);
-                                }
-                                _ => return Err(UnknownBuiltinType { name }),
-                            }
-                        }
-                    }
+impl Item {
+    fn pass1(self, context: &mut File) -> Result<(), Pass1Error> {
+        match self {
+            Self::Function(func) => context.functions.push(FunctionItem::Normal(func)),
+            Self::ImportExtern(import) => {
+                for item in import.items {
+                    item.pass1(&import.protocol, context)?;
                 }
             }
         }
-    }
 
-    Ok(File { functions, types })
+        Ok(())
+    }
+}
+
+impl ExternItem {
+    fn pass1(self, protocol: &str, context: &mut File) -> Result<(), Pass1Error> {
+        match self {
+            Self::Function(signature) => {
+                context.functions.push(FunctionItem::Extern(ExternFunction {
+                    signature,
+                    protocol: protocol.to_owned(),
+                }))
+            }
+
+            Self::Type(name) => {
+                if context.types.contains_key(&name) {
+                    return Err(TypeAlreadyExists { name });
+                }
+
+                if protocol != "builtin" {
+                    return Err(RealExternTypeNotSupported {
+                        name,
+                        protocol: protocol.to_owned(),
+                    });
+                }
+
+                match &name[..] {
+                    "Integer" => {
+                        context.types.insert(name, Type::Integer);
+                    }
+                    "Float" => {
+                        context.types.insert(name, Type::Float);
+                    }
+                    _ => return Err(UnknownBuiltinType { name }),
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
+pub fn pass1(input: parser::File) -> Result<File, Pass1Error> {
+    input.pass1()
 }
 
 #[derive(Debug, Error)]

@@ -1,7 +1,7 @@
 pub use super::parser::data::*;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct File {
     pub types: HashMap<String, Type>,
     pub functions: Vec<FunctionItem>,

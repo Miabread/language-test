@@ -464,6 +464,7 @@ dependencies = [
 name = "language-test-compiler"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "clap",
  "cranelift",
  "cranelift-module",

@@ -1,6 +1,6 @@
 use clap::Clap;
 use language_test_compiler::compile;
-use std::{env, fs, io::Write};
+use std::{env, fs};
 
 #[derive(Debug, Clone, Clap)]
 #[clap(version = "0.1.0", author = "jamesBeeProg <jamesBeeProg@gmail.com>")]
@@ -9,21 +9,15 @@ struct Settings {
     output: String,
 }
 
-fn main() {
-    let cwd = env::current_dir().expect("couldn't get current dir");
+fn main() -> anyhow::Result<()> {
+    let cwd = env::current_dir()?;
     let settings = Settings::parse();
 
-    let input = fs::read_to_string(cwd.join(settings.input)).expect("couldn't read source file");
+    let input = fs::read_to_string(cwd.join(settings.input))?;
 
-    let compiled = match compile(&input) {
-        Ok(compiled) => compiled,
-        Err(error) => {
-            eprintln!("Error: {}", error);
-            return;
-        }
-    };
+    let compiled = compile(&input)?;
 
-    println!("{:?}", compiled);
+    println!("{:#?}", compiled);
 
     // fs::OpenOptions::new()
     //     .create(true)
@@ -33,4 +27,6 @@ fn main() {
     //     .unwrap()
     //     .write_all(&compiled)
     //     .unwrap();
+
+    Ok(())
 }

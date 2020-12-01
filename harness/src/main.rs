@@ -1,10 +1,12 @@
 extern "C" {
-    pub fn foobar() -> i32;
+    pub fn foo() -> i32;
+    pub fn bar() -> f32;
 }
 
 fn main() {
     unsafe {
-        println!("{}", foobar());
+        println!("{}", foo());
+        println!("{}", bar());
     }
 }
 

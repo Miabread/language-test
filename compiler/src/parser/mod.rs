@@ -1,40 +1,22 @@
 lalrpop_mod!(#[allow(clippy::all)] pub grammar, "/parser/grammar.rs");
 
-pub fn parse(input: &str) -> Result<File, String> {
+pub mod data;
+
+pub use data::*;
+use std::fmt;
+use thiserror::Error;
+
+pub fn parse(input: &str) -> Result<File, ParseError> {
     grammar::FileParser::new()
         .parse(input)
-        .map_err(|e| format!("{:?}", e))
+        .map_err(|e| ParseError(format!("{:?}", e)))
 }
 
-#[derive(Debug, Clone)]
-pub struct File {
-    pub items: Vec<Item>,
-}
+#[derive(Debug, Clone, Error)]
+pub struct ParseError(String);
 
-#[derive(Debug, Clone)]
-pub enum Item {
-    Function(Function),
-    Import(Import),
-}
-
-#[derive(Debug, Clone)]
-pub struct FunctionSignature {
-    pub name: String,
-    pub return_ty: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct Import {
-    pub signatures: Vec<FunctionSignature>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Function {
-    pub signature: FunctionSignature,
-    pub body: Expression,
-}
-
-#[derive(Debug, Clone)]
-pub enum Expression {
-    Literal(i32),
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
 }

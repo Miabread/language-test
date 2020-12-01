@@ -7,7 +7,7 @@ match {
     r"//[^\n\r]*[\n\r]*" => { },
     r"/\*([^\*]*\*+[^\*/])*([^\*]*\*+|[^\*])*\*/" => { },
 } else {
-    "func", "import", "external", // Keywords
+    "func", "import", "external", "type", // Keywords
 
     "->", ";", // Symbols
 
@@ -16,6 +16,8 @@ match {
     // Regex Tokens
     r"[a-zA-Z_]\w*" => IDENTIFIER,
     r"[+-]?\d+" => INT_LITERAL,
+    r"[+-]?\d+\.\d+" => FLOAT_LITERAL,
+    r#""(\\.|[^"\\])*""# => STRING_LITERAL,
 } else {
     r"\s*" => { }, // Whitespace
 }
@@ -42,10 +44,8 @@ pub File: File = <items: Item*> => File { <> };
 
 Item: Item = {
     Function => Item::Function(<>),
-    Import => Item::Import(<>),
+    ImportExtern => Item::ImportExtern(<>),
 }
-
-Import: Import = "import" "external" "{" <signatures: (<FunctionSignature> ";")*> "}" => Import { <> };
 
 Function: Function = <signature: FunctionSignature>"{" <body: Expression> "}" => Function { <> };
 
@@ -55,4 +55,16 @@ Expression: Expression = {
     Literal => Expression::Literal(<>),
 }
 
-Literal: i32 = INT_LITERAL => i32::from_str(<>).unwrap();
+Literal: Literal = {
+    INT_LITERAL => Literal::Integer(i32::from_str(<>).unwrap()),
+    FLOAT_LITERAL => Literal::Float(f32::from_str(<>).unwrap()),
+}
+
+StringLiteral: String = STRING_LITERAL => <>[1..(<>.len()-1)].to_owned();
+
+ImportExtern: ImportExtern = "import" "external" "(" <protocol: StringLiteral> ")" "{" <items: ExternItem*> "}" => ImportExtern { <> };
+
+ExternItem: ExternItem = {
+    <FunctionSignature> ";" => ExternItem::Function(<>),
+    "type" <Identifier> ";" => ExternItem::Type(<>),
+}

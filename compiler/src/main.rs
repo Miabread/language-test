@@ -23,12 +23,14 @@ fn main() {
         }
     };
 
-    fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .open(cwd.join(settings.output))
-        .unwrap()
-        .write_all(&compiled)
-        .unwrap();
+    println!("{:?}", compiled);
+
+    // fs::OpenOptions::new()
+    //     .create(true)
+    //     .write(true)
+    //     .truncate(true)
+    //     .open(cwd.join(settings.output))
+    //     .unwrap()
+    //     .write_all(&compiled)
+    //     .unwrap();
 }

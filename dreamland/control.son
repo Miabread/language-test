@@ -1,0 +1,69 @@
+/*
+ *  if(x.equal(111), func() { 222 }, else: func() { 333 });
+ *
+ *  if(x.equal(111)) {
+ *      222
+ *  } else {
+ *      333
+ *  }
+ */
+func if<R>(
+    condition: Boolean,
+    when_true: func() -> R,
+    else when_false: func() -> R,
+) -> R {
+    match condition {
+        Boolean::True -> when_true(),
+        Boolean::False -> when_false(),
+    }
+}
+
+
+/*
+ *  test(x.equal(111), func() { print("222"); });
+ *
+ *  test(x.equal(111)) {
+ *      print("222");
+ *  }
+ */
+func test(
+    condition: Boolean,
+    when_true: func() -> Unit,
+) -> Unit {
+    if(condition, when_true) else { Unit }
+}
+
+
+/*
+ *  guard(x.equal(111), else: func() { print("222"); });
+ *
+ *  guard(x.equal(111)) else {
+ *      print("222");
+ *  }
+ */
+func guard(
+    condition: Boolean,
+    when_false: func() -> Unit,
+) -> Unit {
+    if(condition, func() { Unit }, when_false);
+}
+
+
+/*
+ *  for(array, func(item) { print(item); });
+ *
+ *  for(array) do(item) {
+ *      print(item);
+ *  }
+ */
+func for<T>(
+    iter: some Iterator<T>,
+    body: func(T) -> Unit,
+) -> Unit {
+    loop {
+        match(iter.next()) {
+            Some(item) -> body(item),
+            None -> return,
+        }
+    }
+}

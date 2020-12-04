@@ -12,7 +12,7 @@ func if<R>(
     when_true: func() -> R,
     else when_false: func() -> R,
 ) -> R {
-    match condition {
+    match(condition) {
         Boolean::True -> when_true(),
         Boolean::False -> when_false(),
     }
@@ -57,9 +57,10 @@ func guard(
  *  }
  */
 func for<T>(
-    iter: some Iterator<T>,
+    iter: some IntoIterator<T>,
     body: func(T) -> Unit,
 ) -> Unit {
+    let mutable iter = iter.into_iter();
     loop {
         match(iter.next()) {
             Some(item) -> body(item),

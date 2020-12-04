@@ -4,7 +4,7 @@ union Never();
 union Boolean(True, False) {
 
     func not(self: Self) -> Self {
-        match self {
+        match(self) {
             _::True -> _::False,
             _::False -> _::True,
         }
@@ -19,7 +19,7 @@ union Optional<T>(
     Nothing,
 ) {
     func unwrap(self: Self, or default: T) -> T {
-        match self {
+        match(self) {
             _::Some(value) -> value,
             _::Nothing -> default,
         }

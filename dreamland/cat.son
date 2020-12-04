@@ -1,0 +1,33 @@
+import {
+    sonance::{
+        future::await_all,
+        env::{ args, pwd },
+        fs::{ read_file, path::join },
+    },
+}
+
+func main() -> Future<Unit> {
+    let files = args
+        .split(' ')
+        .map do(file) {
+            pwd()
+                .join(file)
+                .read_file()
+        }
+        .await_all()
+        .pass;
+
+    for(files) do(result) {
+        match(result) {
+
+            Okay(file) -> {
+                print(file.content);
+            },
+
+            Error(reason) -> {
+                print("An error occurred: \(reason)");
+                return;
+            },
+        }
+    }
+}

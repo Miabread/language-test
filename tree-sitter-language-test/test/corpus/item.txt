@@ -1,0 +1,54 @@
+======
+Import
+======
+
+import { foo, bar, baz }
+
+---
+
+(source_file 
+    (import_item 
+        (identifier) 
+        (identifier) 
+        (identifier)))
+
+======
+Export
+======
+
+export { foo, bar, baz }
+
+---
+
+(source_file 
+    (export_item 
+        (identifier) 
+        (identifier) 
+        (identifier))) 
+
+
+======
+Struct
+======
+
+struct Chair(
+    design: Design,
+    color: Color,
+    material: Material,
+);
+
+---
+
+(source_file
+    (struct_item
+        name: (identifier)
+        parameters: (struct_parameter_list
+            (struct_parameter
+                name: (identifier)
+                type: (identifier))
+            (struct_parameter
+                name: (identifier)
+                type: (identifier))
+            (struct_parameter
+                name: (identifier)
+                type: (identifier)))))

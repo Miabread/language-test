@@ -1,0 +1,85 @@
+==============
+Empty Function
+==============
+
+func main() -> Unit {}
+
+---
+
+(source_file 
+    (function_item
+        name: (identifier)
+        parameters: (func_parameter_list)
+        return_type: (identifier)
+        body: (block)))
+
+===============
+Implicit Return
+===============
+
+func main() -> U32 {
+    12345
+}
+
+---
+
+(source_file 
+    (function_item
+        name: (identifier)
+        parameters: (func_parameter_list)
+        return_type: (identifier)
+        body: (block 
+            trailing: (number))))
+
+=========
+Variables
+=========
+
+func main() -> U32 {
+    let foo: U32 = 12345;
+    let bar = foo;
+    bar
+}
+
+---
+
+(source_file 
+    (function_item
+        name: (identifier)
+        parameters: (func_parameter_list)
+        return_type: (identifier)
+        body: (block 
+            (let_statement
+                name: (identifier)
+                type: (identifier)
+                value: (number))
+            (let_statement
+                name: (identifier)
+                value: (identifier))
+            trailing: (identifier))))
+
+==========
+Parameters
+==========
+
+func greet(person: String, from hometown: String, times 1234: Integer) -> Unit {}
+
+---
+
+(source_file 
+    (function_item
+        name: (identifier)
+        parameters: (func_parameter_list
+            (func_parameter
+                pattern: (identifier)
+                type: (identifier))
+            (func_parameter
+                name: (identifier)
+                pattern: (identifier)
+                type: (identifier))
+            (func_parameter
+                name: (identifier)
+                pattern: (number)
+                type: (identifier)))
+        return_type: (identifier)
+        body: (block)))

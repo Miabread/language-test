@@ -1,2 +1,4 @@
-/target
-/indev
+target
+indev
+node_modules
+build

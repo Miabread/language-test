@@ -6,10 +6,10 @@ import { foo, bar, baz }
 
 ---
 
-(source_file 
-    (import_item 
-        (identifier) 
-        (identifier) 
+(source_file
+    (import_item
+        (identifier)
+        (identifier)
         (identifier)))
 
 ======
@@ -20,11 +20,11 @@ export { foo, bar, baz }
 
 ---
 
-(source_file 
-    (export_item 
-        (identifier) 
-        (identifier) 
-        (identifier))) 
+(source_file
+    (export_item
+        (identifier)
+        (identifier)
+        (identifier)))
 
 
 ======
@@ -52,3 +52,33 @@ struct Chair(
             (struct_parameter
                 name: (identifier)
                 type: (identifier)))))
+
+=====
+Union
+=====
+
+union Address(
+    Kind1(first: I32, second: I32),
+    Kind2(String),
+);
+
+---
+
+(source_file
+    (union_item
+        name: (identifier)
+        variants: (union_variant_list
+            (union_variant
+                name: (identifier)
+                parameters: (struct_parameter_list
+                    (struct_parameter
+                        name: (identifier)
+                        type: (identifier))
+                    (struct_parameter
+                        name: (identifier)
+                        type: (identifier))))
+            (union_variant
+                name: (identifier)
+                parameters: (struct_parameter_list
+                        (struct_parameter
+                            type: (identifier)))))))

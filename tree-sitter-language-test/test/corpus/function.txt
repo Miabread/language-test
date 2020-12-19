@@ -6,7 +6,7 @@ func main() -> Unit {}
 
 ---
 
-(source_file 
+(source_file
     (function_item
         name: (identifier)
         parameters: (func_parameter_list)
@@ -23,12 +23,12 @@ func main() -> U32 {
 
 ---
 
-(source_file 
+(source_file
     (function_item
         name: (identifier)
         parameters: (func_parameter_list)
         return_type: (identifier)
-        body: (block 
+        body: (block
             trailing: (number))))
 
 =========
@@ -43,12 +43,12 @@ func main() -> U32 {
 
 ---
 
-(source_file 
+(source_file
     (function_item
         name: (identifier)
         parameters: (func_parameter_list)
         return_type: (identifier)
-        body: (block 
+        body: (block
             (let_statement
                 name: (identifier)
                 type: (identifier)
@@ -66,7 +66,7 @@ func greet(person: String, from hometown: String, times 1234: Integer) -> Unit {
 
 ---
 
-(source_file 
+(source_file
     (function_item
         name: (identifier)
         parameters: (func_parameter_list

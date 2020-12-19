@@ -239,6 +239,10 @@
         {
           "type": "struct_item",
           "named": true
+        },
+        {
+          "type": "union_item",
+          "named": true
         }
       ]
     }
@@ -311,6 +315,73 @@
     }
   },
   {
+    "type": "union_item",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "variants": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "union_variant_list",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "union_variant",
+    "named": true,
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "parameters": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "struct_parameter_list",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "union_variant_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "union_variant",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "(",
     "named": false
   },
@@ -368,6 +439,10 @@
   },
   {
     "type": "struct",
+    "named": false
+  },
+  {
+    "type": "union",
     "named": false
   },
   {

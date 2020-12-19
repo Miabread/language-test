@@ -24,6 +24,7 @@ module.exports = grammar({
             $.import_item,
             $.export_item,
             $.struct_item,
+            $.union_item,
             $.function_item,
         ),
 
@@ -47,9 +48,25 @@ module.exports = grammar({
         struct_parameter_list: $ => parens(sepBy(',', $.struct_parameter)),
 
         struct_parameter: $ => seq(
-            field('name', optional($.identifier)),
-            ':',
+            optional(seq(
+                field('name', $.identifier),
+                ':',
+            )),
             field('type', $._type),
+        ),
+
+        union_item: $ => seq(
+            'union',
+            field('name', $.identifier),
+            field('variants', $.union_variant_list),
+            ';',
+        ),
+
+        union_variant_list: $ => parens(sepBy(',', $.union_variant)),
+
+        union_variant: $ => seq(
+            field('name', $.identifier),
+            field('parameters', $.struct_parameter_list),
         ),
 
         function_item: $ => seq(

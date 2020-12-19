@@ -1,0 +1,30 @@
+import { sonance::prelude::* }
+
+export { Ordering, Order, order_i32 }
+
+union Ordering {
+    Greater,
+    Equal,
+    Less,
+}
+
+trait Order {
+    func compare(&self, other: &Self) -> Ordering;
+}
+
+module order_i32 provides Order for I32 {
+
+    func compare(self, other) {
+        import { sonance::builtin }
+
+        when(builtin::i32_less(self, other)) {
+            return Ordering::Less;
+        }
+
+        when(builtin::i32_equal(self, other)) {
+            return Ordering::Equal;
+        }
+
+        Ordering::Greater
+    }
+}

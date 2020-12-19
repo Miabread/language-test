@@ -1,7 +1,11 @@
+export { Boolean, Boolean::*, if, when, guard }
+
+union Boolean(True, False);
+
 /*
- *  if(x.equal(111), func() { 222 }, else: func() { 333 });
+ *  if(equal(x, 111), func() { 222 }, else: func() { 333 });
  *
- *  if(x.equal(111)) {
+ *  if(equal(x, 111)) {
  *      222
  *  } else {
  *      333
@@ -18,53 +22,30 @@ func if<R>(
     }
 }
 
-
 /*
- *  test(x.equal(111), func() { print("222"); });
+ *  when(equal(x, 111), func() { print("222"); });
  *
- *  test(x.equal(111)) {
+ *  when(equal(x, 111)) {
  *      print("222");
  *  }
  */
-func test(
+func when(
     condition: Boolean,
     when_true: func() -> Unit,
 ) -> Unit {
-    if(condition, when_true) else { Unit }
+    if(condition) { when_true() } else {}
 }
 
-
 /*
- *  guard(x.equal(111), else: func() { print("222"); });
+ *  guard(equal(x, 111), else: func() { return 222; });
  *
- *  guard(x.equal(111)) else {
- *      print("222");
+ *  guard(equal(x, 111)) else {
+ *      return 222;
  *  }
  */
 func guard(
     condition: Boolean,
-    when_false: func() -> Unit,
-) -> Unit {
-    if(condition, func() { Unit }, when_false);
-}
-
-
-/*
- *  for(array, func(item) { print(item); });
- *
- *  for(array) do(item) {
- *      print(item);
- *  }
- */
-func for<T>(
-    iter: some IntoIterator<T>,
-    body: func(T) -> Unit,
-) -> Unit {
-    let mutable iter = iter.into_iter();
-    loop {
-        match(iter.next()) {
-            Some(item) -> body(item),
-            None -> return,
-        }
-    }
+    else when_false: func() -> Never,
+) -> Never {
+    if(condition) {} else { when_false() }
 }

@@ -1,0 +1,58 @@
+import {
+    sonance::{
+        prelude::*,
+        builtin::loop,
+    }
+}
+
+export { Iterator, for, while, loop }
+
+trait Iterator {
+    type Item;
+
+    func next(&mutable self) -> Optional<Item>;
+}
+
+/*
+ *  for(array, func(item) { print(item); });
+ *
+ *  for(array) do(item) {
+ *    print(item);
+ *  }
+ */
+func for<T>(
+    iter: some Into<Iterator<Item: T>>,
+    body: func(T) -> Unit,
+) -> Unit {
+    let mutable iter = iter.into();
+
+    loop {
+        match(iter.next()) {
+            Some(item) -> body(item),
+            None -> return,
+        }
+    }
+}
+
+/*
+ *  let mutable i = 1;
+ *
+ *  while(func() { i > 100 }, func() { print(i); i = add(i, 1); });
+ *
+ *  while { i > 100 } {
+ *      print(i);
+ *      i .= add(1);
+ *  }
+ */
+func while(
+    condition: func() -> Boolean,
+    body: func() -> Unit,
+) {
+    loop {
+        if(condition()) {
+            body();
+        } else {
+            return;
+        }
+    }
+}

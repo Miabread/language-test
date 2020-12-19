@@ -1,0 +1,38 @@
+import { sonance::prelude::* }
+
+export { Point2D, Rectangle, rectangle }
+
+struct Point2D(x: F32, y: F32);
+
+struct Rectangle(
+    start: Point2D,
+    end: Point2D,
+);
+
+module rectangle for Rectangle {
+
+    export { width, height, area, perimeter, center }
+
+    func width(&self) -> F32 {
+        subtract(self.start.x, self.end.x).absolute_value()
+    }
+
+    func height(&self) -> F32 {
+        subtract(self.start.y, self.end.y).absolute_value()
+    }
+
+    func area(&self) -> F32 {
+        multiply(self.width(), self.height())
+    }
+
+    func perimeter(&self) -> F32 {
+        add(self.width(), self.height()).multiply(2)
+    }
+
+    func center(&self) -> Point2D {
+        Point2D(
+            x: add(self.start.x, self.end.x).divide(2.0),
+            y: add(self.start.y, self.end.y).divide(2.0),
+        )
+    }
+}

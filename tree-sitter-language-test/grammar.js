@@ -41,6 +41,7 @@ module.exports = grammar({
         struct_item: $ => seq(
             'struct',
             field('name', $.identifier),
+            optional(field('generics', $.generic_parameter_list)),
             field('parameters', $.struct_parameter_list),
             ';',
         ),
@@ -55,9 +56,24 @@ module.exports = grammar({
             field('type', $._type),
         ),
 
+        generic_parameter_list: $ => seq(
+            '<',
+            sepBy(',', $.generic_parameter),
+            '>',
+        ),
+
+        generic_parameter: $ => seq(
+            field('name', $.identifier),
+            optional(seq(
+                ':',
+                field('bounds', $.identifier),
+            )),
+        ),
+
         union_item: $ => seq(
             'union',
             field('name', $.identifier),
+            optional(field('generics', $.generic_parameter_list)),
             field('variants', $.union_variant_list),
             ';',
         ),
@@ -66,12 +82,13 @@ module.exports = grammar({
 
         union_variant: $ => seq(
             field('name', $.identifier),
-            field('parameters', $.struct_parameter_list),
+            optional(field('parameters', $.struct_parameter_list)),
         ),
 
         function_item: $ => seq(
             'func',
             field('name', $.identifier),
+            optional(field('generics', $.generic_parameter_list)),
             field('parameters', $.func_parameter_list),
             '->',
             field('return_type', $._type),

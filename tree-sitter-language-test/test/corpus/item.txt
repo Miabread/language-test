@@ -31,10 +31,10 @@ export { foo, bar, baz }
 Struct
 ======
 
-struct Chair(
+struct Chair<M: Material>(
+    Color,
     design: Design,
-    color: Color,
-    material: Material,
+    material: M,
 );
 
 ---
@@ -42,9 +42,12 @@ struct Chair(
 (source_file
     (struct_item
         name: (identifier)
+        generics: (generic_parameter_list
+            (generic_parameter
+                name: (identifier)
+                bounds: (identifier)))
         parameters: (struct_parameter_list
             (struct_parameter
-                name: (identifier)
                 type: (identifier))
             (struct_parameter
                 name: (identifier)
@@ -60,6 +63,7 @@ Union
 union Address(
     Kind1(first: I32, second: I32),
     Kind2(String),
+    Kind3,
 );
 
 ---
@@ -81,4 +85,6 @@ union Address(
                 name: (identifier)
                 parameters: (struct_parameter_list
                         (struct_parameter
-                            type: (identifier)))))))
+                            type: (identifier))))
+            (union_variant
+                name: (identifier)))))

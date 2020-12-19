@@ -83,3 +83,26 @@ func greet(person: String, from hometown: String, times 1234: Integer) -> Unit {
                 type: (identifier)))
         return_type: (identifier)
         body: (block)))
+
+========
+Generics
+========
+
+func foo<T, U: V, W>() -> W {}
+
+---
+
+(source_file
+    (function_item
+        name: (identifier)
+        generics: (generic_parameter_list
+            (generic_parameter
+                name: (identifier))
+            (generic_parameter
+                name: (identifier)
+                bounds: (identifier))
+            (generic_parameter
+                name: (identifier)))
+        parameters: (func_parameter_list)
+        return_type: (identifier)
+        body: (block)))

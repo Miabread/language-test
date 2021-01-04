@@ -1,13 +1,15 @@
-const sepBy1 = (sep, rule) => seq(
-    rule,
-    repeat(seq(sep, rule)),
-    optional(sep),
-);
+const
+    sepBy = (sep, rule) => optional(sepBy1(sep, rule)),
+    sepBy1 = (sep, rule) => seq(
+        rule,
+        repeat(seq(sep, rule)),
+        optional(sep),
+    ),
 
-const sepBy = (sep, rule) => optional(sepBy1(sep, rule));
-
-const parens = (rule) => seq('(', rule, ')');
-const block = (rule) => seq('{', rule, '}');
+    wrap = (start, end) => (rule) => seq(start, rule, end),
+    parens = wrap('(', ')'),
+    block = wrap('{', '}'),
+    angles = wrap('<', '>');
 
 module.exports = grammar({
     name: 'language_test',
@@ -56,11 +58,7 @@ module.exports = grammar({
             field('type', $._type),
         ),
 
-        generic_parameter_list: $ => seq(
-            '<',
-            sepBy(',', $.generic_parameter),
-            '>',
-        ),
+        generic_parameter_list: $ => angles(sepBy(',', $.generic_parameter)),
 
         generic_parameter: $ => seq(
             field('name', $.identifier),

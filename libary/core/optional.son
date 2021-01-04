@@ -1,0 +1,28 @@
+export { Optional, Some, Nothing };
+
+import {
+    super::boolean::{Boolean, True, False},
+    Optional::*,
+};
+
+union Optional<T>(Some(T), Nothing);
+
+func if<R>(condition: Boolean, body: func() -> R) -> Optional<R> {
+    match(condition) {
+        True -> Some(body()),
+        False -> Nothing,
+    }
+};
+
+func else<R>(self: Optional<R>, body: func() -> R) -> R {
+    match(self) {
+        Some(value) -> value,
+        Nothing -> body(),
+    }
+};
+
+func else_if<R>(self: Optional<R>, condition: func() -> Boolean, body: func() -> R) -> Optional<R> {
+    self else {
+        if(condition(), body)
+    }
+};

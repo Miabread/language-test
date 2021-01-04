@@ -1,0 +1,26 @@
+export { Boolean, True, False, not, and, or };
+
+import { Boolean::* };
+
+union Boolean(True, False);
+
+func not(self: Boolean) -> Boolean {
+    match(self) {
+        True -> False,
+        False -> True,
+    }
+};
+
+func and(left: Boolean, right: Boolean) -> Boolean {
+    match(left) {
+        False -> False,
+        True -> right,
+    }
+};
+
+func or(left: Boolean, right: Boolean) -> Boolean {
+    match(left) {
+        True -> True,
+        False -> right,
+    }
+};

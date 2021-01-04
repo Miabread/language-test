@@ -5,7 +5,7 @@
 An optional represents a value that may or not be present.
 
 It is either a `Some(T)` variant containing a present value or the `Nothing` variant representing the lack thereof.
-Optionals have many uses cases, including:
+Optionals have many use cases, including:
 
 - "Nullable" values
 - Conditionals
@@ -28,7 +28,7 @@ match(maybe_color) {
 
 ## if()
 
-Evaluate a block if a condition is `True`.
+Evaluates a block if a condition is `True`.
 
 This is similar to `if` statements in other languages, but notably this `if` can return a value.
 The result of the function is either a `Some(R)` if the block ran or a `Nothing` otherwise.
@@ -60,7 +60,7 @@ assert_equal(bar, Nothing);
 
 ## else()
 
-Evaluate a block if a optional is `Nothing`.
+Evaluates a block if a optional is `Nothing`.
 
 This is used to unwrap a `Optional` by providing a default value.
 It also is commonly used in conjunction with `if` to provide a fallback if a condition was `False`.

@@ -1,23 +1,23 @@
-export { From, Into, reflective, reciprocal }
+export { From, Into, reflective, reciprocal };
 
-trait From<T> {
+trait From<Self, T> {
     func from(other: T) -> Self;
-}
+};
 
-trait Into<T> {
-    func into(self) -> T;
-}
+trait Into<Self, T> {
+    func into(self: Self) -> T;
+};
 
 // Reflective property
-module reflective<T> provides From<T> for T {
+module reflective<Self, T> -> From<Self, T> {
     func from(other) {
         other
-    }
-}
+    };
+};
 
 // Reciprocal property
-module reciprocal<T, U: From<T>> provides Into<U> for T {
+module reciprocal<Self, T, impl: From<T, Self>> -> Into<Self, T>  {
     func into(self) {
-        U::from(self)
-    }
-}
+        impl::from(self)
+    };
+};

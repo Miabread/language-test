@@ -1,21 +1,21 @@
-func fizzbuzz(number) -> String {
+func fizzbuzz(number: U32) -> String {
     let factors = struct(
-        number.modulo(3),
-        number.modulo(5),
+        number modulo(3),
+        number modulo(5),
     );
 
     match(factors) {
         struct(0, 0) -> "Fizzbuzz",
         struct(0, _) -> "Fizz",
         struct(_, 0) -> "Buzz",
-        _ -> number.to_string(),
+        _ -> number to_string(),
     }
 }
 
 func factorial(number: U32) -> U32 {
     match(number) {
         0 | 1 -> 1,
-        _ -> number.subtract(1).factorial().multiply(number),
+        _ -> number subtract(1) factorial() multiply(number),
     }
 }
 
@@ -24,20 +24,19 @@ func fibonacci(number: I32) -> I32 {
         0 -> 0,
         1 -> 1,
         _ -> add(
-            fibonacci(number.subtract(1)),
-            fibonacci(number.subtract(2)),
+            number subtract(1) fibonacci(),
+            number subtract(2) fibonacci(),
         ),
     }
 }
 
-func count_vowels(input: &String) -> U32 {
-    input
-        .characters()
-        .filter do(char) {
+func count_vowels(input: ref String) -> U32 {
+    input characters()
+        filter do(char) {
             match(char) {
                 'a' | 'e' | 'i' | 'o' | 'u' -> True,
                 _ -> False,
             }
         }
-        .count()
+        count()
 }

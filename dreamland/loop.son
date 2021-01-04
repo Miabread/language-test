@@ -1,24 +1,24 @@
+export { Iterator, for, while, loop };
+
 import {
     sonance::{
         prelude::*,
         builtin::loop,
-    }
-}
+    },
+};
 
-export { Iterator, for, while, loop }
-
-trait Iterator {
+trait Iterator<Self> {
     type Item;
 
-    func next(&mutable self) -> Optional<Item>;
-}
+    func next(self: ref mutable Self) -> Optional<Item>;
+};
 
 /*
  *  for(array, func(item) { print(item); });
  *
  *  for(array) do(item) {
  *    print(item);
- *  }
+ *  };
  */
 func for<T>(
     iter: some Into<Iterator<Item: T>>,
@@ -30,9 +30,9 @@ func for<T>(
         match(iter.next()) {
             Some(item) -> body(item),
             None -> return,
-        }
-    }
-}
+        };
+    };
+};
 
 /*
  *  let mutable i = 1;
@@ -41,8 +41,8 @@ func for<T>(
  *
  *  while { i > 100 } {
  *      print(i);
- *      i .= add(1);
- *  }
+ *      i = add(i, 1);
+ *  };
  */
 func while(
     condition: func() -> Boolean,
@@ -53,6 +53,6 @@ func while(
             body();
         } else {
             return;
-        }
-    }
-}
+        };
+    };
+};

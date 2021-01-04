@@ -1,21 +1,19 @@
 import {
     sonance::{
-        future::await_all,
-        env::{ args, pwd },
-        fs::{ read_file, path::join },
+        sequence::iterator::bind_all,
+        environment::{ arguments, current_directory },
+        files::{ read_file, path::join },
     },
-}
+};
 
 func main() -> Future<Unit> {
-    let files = args
-        .split(' ')
-        .map do(file) {
-            pwd()
-                .join(file)
-                .read_file()
+    let files = arguments()
+        split(' ')
+        map do(path) {
+            current_directory() join(path) read_file()
         }
-        .await_all()
-        .pass;
+        bind_all()
+        unwrap;
 
     for(files) do(result) {
         match(result) {
@@ -28,6 +26,6 @@ func main() -> Future<Unit> {
                 print("An error occurred: \(reason)");
                 return;
             },
-        }
-    }
-}
+        };
+    };
+};

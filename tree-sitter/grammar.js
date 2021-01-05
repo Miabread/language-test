@@ -22,12 +22,27 @@ module.exports = grammar({
     rules: {
         source_file: $ => repeat($._item),
 
-        _item: $ => choice(
-            $.import_item,
-            $.export_item,
-            $.struct_item,
-            $.union_item,
-            $.function_item,
+        _item: $ => seq(
+            choice(
+                $.module_item,
+                $.import_item,
+                $.export_item,
+                $.struct_item,
+                $.union_item,
+                $.function_item,
+            ),
+            ';',
+        ),
+
+        module_item: $ => seq(
+            'module',
+            field('name', $.identifier),
+            optional(field('generics', $.generic_parameter_list)),
+            optional(seq(
+                '->',
+                field('return_type', $._type),
+            )),
+            block(repeat($._item)),
         ),
 
         import_item: $ => seq(
@@ -45,7 +60,6 @@ module.exports = grammar({
             field('name', $.identifier),
             optional(field('generics', $.generic_parameter_list)),
             field('parameters', $.struct_parameter_list),
-            ';',
         ),
 
         struct_parameter_list: $ => parens(sepBy(',', $.struct_parameter)),
@@ -73,7 +87,6 @@ module.exports = grammar({
             field('name', $.identifier),
             optional(field('generics', $.generic_parameter_list)),
             field('variants', $.union_variant_list),
-            ';',
         ),
 
         union_variant_list: $ => parens(sepBy(',', $.union_variant)),
@@ -88,9 +101,11 @@ module.exports = grammar({
             field('name', $.identifier),
             optional(field('generics', $.generic_parameter_list)),
             field('parameters', $.func_parameter_list),
-            '->',
-            field('return_type', $._type),
-            field('body', $.block)
+            optional(seq(
+                '->',
+                field('return_type', $._type),
+            )),
+            field('body', $.block),
         ),
 
         func_parameter_list: $ => parens(sepBy(',', $.func_parameter)),

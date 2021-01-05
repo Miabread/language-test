@@ -2,7 +2,7 @@
 Import
 ======
 
-import { foo, bar, baz }
+import { foo, bar, baz };
 
 ---
 
@@ -16,7 +16,7 @@ import { foo, bar, baz }
 Export
 ======
 
-export { foo, bar, baz }
+export { foo, bar, baz };
 
 ---
 
@@ -88,3 +88,44 @@ union Address(
                             type: (identifier))))
             (union_variant
                 name: (identifier)))))
+
+=============
+Simple Module
+=============
+
+module foo {
+    func bar() {};
+};
+
+---
+
+(source_file
+    (module_item
+        name: (identifier)
+        (function_item
+            name: (identifier)
+            parameters: (func_parameter_list)
+            body: (block))))
+
+==============
+Complex Module
+==============
+
+module foo<Self> -> Foo {
+    func bar() -> Self {};
+};
+
+---
+
+(source_file
+    (module_item
+        name: (identifier)
+        generics: (generic_parameter_list
+            (generic_parameter
+                name: (identifier)))
+        return_type: (identifier)
+        (function_item
+            name: (identifier)
+            parameters: (func_parameter_list)
+            return_type: (identifier)
+            body: (block))))

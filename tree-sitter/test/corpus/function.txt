@@ -2,7 +2,7 @@
 Empty Function
 ==============
 
-func main() -> Unit {}
+func main() {};
 
 ---
 
@@ -10,7 +10,6 @@ func main() -> Unit {}
     (function_item
         name: (identifier)
         parameters: (func_parameter_list)
-        return_type: (identifier)
         body: (block)))
 
 ===============
@@ -19,7 +18,7 @@ Implicit Return
 
 func main() -> U32 {
     12345
-}
+};
 
 ---
 
@@ -39,7 +38,7 @@ func main() -> U32 {
     let foo: U32 = 12345;
     let bar = foo;
     bar
-}
+};
 
 ---
 
@@ -62,7 +61,7 @@ func main() -> U32 {
 Parameters
 ==========
 
-func greet(person: String, from hometown: String, times 1234: Integer) -> Unit {}
+func greet(person: String, from hometown: String, times 1234: Integer) {};
 
 ---
 
@@ -81,14 +80,13 @@ func greet(person: String, from hometown: String, times 1234: Integer) -> Unit {
                 name: (identifier)
                 pattern: (number)
                 type: (identifier)))
-        return_type: (identifier)
         body: (block)))
 
 ========
 Generics
 ========
 
-func foo<T, U: V, W>() -> W {}
+func foo<T, U: V, W>() -> W {};
 
 ---
 

@@ -1,0 +1,9 @@
+export { Unit, default };
+
+struct Unit();
+
+module default -> Default<Unit> {
+    func default() {
+        Unit
+    };
+};

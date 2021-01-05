@@ -1,0 +1,26 @@
+export { Default, Pointed, Functor, Monad };
+
+trait Default<Self> {
+
+    func default() -> Self;
+};
+
+trait Pointed<Self<?>> {
+
+    func of<T>(value: T) -> Self<T>;
+};
+
+trait Functor<Self<?>> {
+
+    func map<T, R>(self: Self<T>, fn: func(T) -> R) -> Self<R>;
+};
+
+trait Monad<Self<?>> {
+
+    func flat_map<T, R>(self: Self<T>, fn: func(T) -> Self<R>) -> Self<R>;
+};
+
+trait Monoid<T, impl: Default<T>> {
+
+    func combine(left: T, right: T) -> T;
+};

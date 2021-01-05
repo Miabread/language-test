@@ -1,0 +1,31 @@
+export { identity, Identity, default, pointed, functor, monad }
+
+func identity<T>(self: T) -> T {
+    self
+};
+
+struct Identity<T>(value: T);
+
+module default<T, impl: Default<T>> -> Default<Identity<T>> {
+    func default() {
+        Identity(impl::default())
+    };
+};
+
+module pointed -> Pointed<Identity<?>> {
+    func of(self) {
+        Identity(self)
+    };
+};
+
+module functor -> Functor<Identity<?>> {
+    func map(self, fn) {
+        self.value fn() Identity()
+    };
+};
+
+module monad -> Monad<Identity<?>> {
+    func map(self, fn) {
+        self.value fn()
+    };
+};

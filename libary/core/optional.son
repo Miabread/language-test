@@ -7,6 +7,30 @@ import {
 
 union Optional<T>(Some(T), Nothing);
 
+module default_some<T, impl: Default<T>> -> Default<Optional<T>> {
+    func default() {
+        Some(impl::default())
+    }
+}
+
+module default_nothing<T> -> Default<Optional<T>> {
+    func default() {
+        Nothing
+    }
+}
+
+module pointed_some -> Pointed<Optional<?>> {
+    func of(value) {
+        Some(value)
+    }
+}
+
+module pointed_nothing -> Pointed<Optional<?>> {
+    func of(_) {
+        Nothing
+    }
+}
+
 func if<R>(condition: Boolean, body: func() -> R) -> Optional<R> {
     match(condition) {
         True -> Some(body()),

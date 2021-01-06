@@ -1,0 +1,20 @@
+export { Equal, TryEqual, normal_to_try };
+
+trait Equal<T> {
+    func equal(left: ref T, right: ref T) -> Boolean;
+
+    func not_equal(left: ref T, right: ref T) -> Boolean {
+        not(this::equal(left, right))
+    };
+};
+
+trait TryEqual<T> {
+    func try_equal(left: ref T, right: ref T) -> Optional<Boolean>;
+};
+
+module normal_to_try<T, impl: Equal<T>> -> Equal<T> {
+
+    func try_equal(left, right) {
+        Some(impl::equal(left, right))
+    };
+};

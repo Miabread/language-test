@@ -1,4 +1,4 @@
-export { identity, Identity, default, pointed, functor, monad }
+export { identity, Identity, default, pointed, functor, monad };
 
 func identity<T>(self: T) -> T {
     self

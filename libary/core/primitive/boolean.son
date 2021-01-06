@@ -1,4 +1,4 @@
-export { Boolean, True, False, not, and, or };
+export { Boolean, True, False, not, and, or, equal };
 
 import { Boolean::* };
 
@@ -23,4 +23,13 @@ func or(left: Boolean, right: Boolean) -> Boolean {
         True -> True,
         False -> right,
     }
+};
+
+module equal -> Equal<Boolean> {
+    func equal(left, right) {
+        match(left) {
+            True -> right,
+            False -> not(right),
+        }
+    };
 };

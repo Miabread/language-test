@@ -1,4 +1,4 @@
-export { From, FromRef, FromMutable, from_self, from_ref, from_mutable };
+export { From, FromRef, FromMutable, from_self, from_ref_self, from_mutable_self };
 
 trait From<T, U> {
     func from(other: T) -> U;

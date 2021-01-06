@@ -3,7 +3,7 @@ export { order_equal, try_order_equal };
 import export {
     equal::{ Equal, TryEqual, equal, not_equal },
     order::{
-        Order, TryOrder, Ordering,
+        Ordering, Order, TryOrder,
         greater_than, less_than,
         greater_or_equal, less_or_equal,
     },
@@ -13,7 +13,7 @@ import {
     Ordering::*,
 };
 
-module order_equal<T, impl: Order<T>> -> Equal<T> {
+module order_equal<T, U = T, impl: Order<T, U>> -> Equal<T, U> {
 
     func equal(left, right) {
         impl::equal(left, right)
@@ -24,7 +24,7 @@ module order_equal<T, impl: Order<T>> -> Equal<T> {
     };
 };
 
-module try_order_equal<T, impl: TryOrder<T>> -> TryEqual<T> {
+module try_order_equal<T, U = T, impl: TryOrder<T, U>> -> TryEqual<T, U> {
 
     func try_equal(left, right) {
         match(impl::try_compare(left, right)) {

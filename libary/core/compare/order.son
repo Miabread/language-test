@@ -11,45 +11,45 @@ union Ordering {
     Less,
 };
 
-trait Order<T> {
-    func compare(left: ref T, other: ref T) -> Ordering;
+trait Order<T, U = T> {
+    func compare(left: ref T, right: ref U) -> Ordering;
 
-    func greater_than(left: ref T, right: ref T) -> Boolean {
+    func greater_than(left: ref T, right: ref U) -> Boolean {
         match(this::compare(left, right)) {
             Greater -> True,
             Equal | Less -> False,
         }
     };
 
-    func greater_or_equal(left: ref T, right: ref T) -> Boolean {
+    func greater_or_equal(left: ref T, right: ref U) -> Boolean {
         not(this::less_than(left, right))
     };
 
-    func equal(left: ref T, right: ref T) -> Boolean {
+    func equal(left: ref T, right: ref U) -> Boolean {
         match(this::compare(left, right)) {
             Equal -> True,
             Greater | Less -> False,
         };
     };
 
-    func not_equal(left: ref T, right: ref T) -> Boolean {
+    func not_equal(left: ref T, right: ref U) -> Boolean {
         not(this::equal(left, right))
     };
 
-    func less_than(left: ref T, right: ref T) -> Boolean {
+    func less_than(left: ref T, right: ref U) -> Boolean {
         match(this::compare(left, right)) {
             Less -> True,
             Greater | Equal -> False,
         }
     };
 
-    func less_or_equal(left: ref T, right: ref T) -> Boolean {
+    func less_or_equal(left: ref T, right: ref U) -> Boolean {
         not(this::greater_than(left, right))
     };
 };
 
-trait TryOrder<T> {
-    func try_compare(left: ref T, other: ref T) -> Optional<Ordering>;
+trait TryOrder<T, U = T> {
+    func try_compare(left: ref T, other: ref U) -> Optional<Ordering>;
 };
 
 func reverse(self: Ordering) -> Ordering {
@@ -60,7 +60,7 @@ func reverse(self: Ordering) -> Ordering {
     }
 };
 
-module normal_to_try<T, impl: Order<T>> -> TryOrder<T> {
+module normal_to_try<T, U = T, impl: Order<T, U>> -> TryOrder<T, U> {
 
     func try_compare(left, right) {
         Some(impl::compare(left, right))

@@ -60,11 +60,11 @@ struct Chair<M: Material>(
 Union
 =====
 
-union Address(
+union Address {
     Kind1(first: I32, second: I32),
     Kind2(String),
     Kind3,
-);
+};
 
 ---
 

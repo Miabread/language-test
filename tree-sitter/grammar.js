@@ -89,7 +89,7 @@ module.exports = grammar({
             field('variants', $.union_variant_list),
         ),
 
-        union_variant_list: $ => parens(sepBy(',', $.union_variant)),
+        union_variant_list: $ => block(sepBy(',', $.union_variant)),
 
         union_variant: $ => seq(
             field('name', $.identifier),

@@ -1,23 +1,31 @@
-export { From, Into, reflective, reciprocal };
+export { From, FromRef, FromMutable, from_self, from_ref, from_mutable };
 
 trait From<T, U> {
     func from(other: T) -> U;
 };
 
-trait Into<T, U> {
-    func into(self: T) -> U;
+trait FromRef<T, U> {
+    func from_ref(other: ref T) -> ref U;
 };
 
-// Reflective property
-module reflective<T> -> From<T, T> {
-    func from(other) {
-        other
+trait FromMutable<T, U> {
+    func from_mutable(other: ref T) -> ref U;
+};
+
+module from_self<T> -> From<T, T> {
+    func from(self) {
+        self
     };
 };
 
-// Reciprocal property
-module reciprocal<T, U, impl: From<T, U>> -> Into<T, U>  {
-    func into(self) {
-        impl::from(self)
+module from_ref_self<T> -> FromRef<T, T> {
+    func from_ref(self) {
+        self
+    };
+};
+
+module from_mutable_self<T> -> FromMutable<T, T> {
+    func from_mutable(self) {
+        self
     };
 };

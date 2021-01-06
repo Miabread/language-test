@@ -2,7 +2,7 @@ export { Boolean, True, False, not, and, or };
 
 import { Boolean::* };
 
-union Boolean(True, False);
+union Boolean { True, False };
 
 func not(self: Boolean) -> Boolean {
     match(self) {

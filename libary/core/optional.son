@@ -5,7 +5,10 @@ import {
     Optional::*,
 };
 
-union Optional<T>(Some(T), Nothing);
+union Optional<T> {
+    Some(T),
+    Nothing,
+};
 
 module default_some<T, impl: Default<T>> -> Default<Optional<T>> {
     func default() {

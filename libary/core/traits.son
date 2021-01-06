@@ -1,23 +1,23 @@
 export { Default, Pointed, Functor, Monad };
 
-trait Default<Self> {
+trait Default<T> {
 
-    func default() -> Self;
+    func default() -> T;
 };
 
-trait Pointed<Self<?>> {
+trait Pointed<P<?>> {
 
-    func of<T>(value: T) -> Self<T>;
+    func of<T>(value: T) -> P<T>;
 };
 
-trait Functor<Self<?>> {
+trait Functor<F<?>> {
 
-    func map<T, R>(self: Self<T>, fn: func(T) -> R) -> Self<R>;
+    func map<T, R>(self: F<T>, fn: func(T) -> R) -> F<R>;
 };
 
-trait Monad<Self<?>> {
+trait Monad<M<?>> {
 
-    func flat_map<T, R>(self: Self<T>, fn: func(T) -> Self<R>) -> Self<R>;
+    func flat_map<T, R>(self: M<T>, fn: func(T) -> M<R>) -> M<R>;
 };
 
 trait Monoid<T, impl: Default<T>> {

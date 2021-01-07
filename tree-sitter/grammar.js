@@ -45,14 +45,32 @@ module.exports = grammar({
             block(repeat($._item)),
         ),
 
+        simple_path: $ => seq(
+            $.identifier,
+            optional(field('args', $.generic_argument_list)),
+            optional(seq('::', $.simple_path)),
+        ),
+
+        compound_path: $ => seq(
+            $.identifier,
+            optional(field('args', $.generic_argument_list)),
+            optional(choice(
+                seq('::', choice(
+                    $.compound_path,
+                    block(sepBy(',', $.compound_path)),
+                )),
+                seq('as', $.identifier),
+            )),
+        ),
+
         import_item: $ => seq(
             'import',
-            block(sepBy(',', $.identifier)),
+            block(sepBy(',', $.compound_path)),
         ),
 
         export_item: $ => seq(
             'export',
-            block(sepBy(',', $.identifier)),
+            block(sepBy(',', $.simple_path)),
         ),
 
         struct_item: $ => seq(
@@ -72,13 +90,15 @@ module.exports = grammar({
             field('type', $._type),
         ),
 
+        generic_argument_list: $ => angles(sepBy(',', $._type)),
+
         generic_parameter_list: $ => angles(sepBy(',', $.generic_parameter)),
 
         generic_parameter: $ => seq(
             field('name', $.identifier),
             optional(seq(
                 ':',
-                field('bounds', $.identifier),
+                field('bounds', $.simple_path),
             )),
         ),
 
@@ -118,7 +138,7 @@ module.exports = grammar({
         ),
 
         _type: $ => choice(
-            $.identifier,
+            $.simple_path,
             // TODO: other kinds of types
         ),
 
@@ -143,7 +163,7 @@ module.exports = grammar({
         ),
 
         _expression: $ => choice(
-            $.identifier,
+            $.simple_path,
             $.number,
             // TODO: other kinds of expressions
         ),

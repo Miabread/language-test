@@ -2,30 +2,97 @@
 Import
 ======
 
-import { foo, bar, baz };
+import { foo, bar::baz };
 
 ---
 
 (source_file
     (import_item
-        (identifier)
-        (identifier)
-        (identifier)))
+        (compound_path
+            (identifier))
+        (compound_path
+            (identifier)
+            (compound_path
+                (identifier)))))
+
+==============
+Complex Import
+==============
+
+import {
+    sonance::core::{
+        primitive::boolean::{Boolean, default as bool_default},
+        identity::default<Boolean, bool_default>::default,
+    },
+};
+
+---
+
+(source_file
+    (import_item
+        (compound_path
+            (identifier)
+            (compound_path
+                (identifier)
+                (compound_path
+                    (identifier)
+                    (compound_path
+                        (identifier)
+                        (compound_path
+                            (identifier))
+                        (compound_path
+                            (identifier)
+                            (identifier))))
+                (compound_path
+                    (identifier)
+                    (compound_path
+                        (identifier)
+                        args: (generic_argument_list
+                            (simple_path
+                                (identifier))
+                            (simple_path
+                                (identifier)))
+                        (compound_path
+                            (identifier))))))))
 
 ======
 Export
 ======
 
-export { foo, bar, baz };
+export { foo, bar::baz };
 
 ---
 
 (source_file
     (export_item
-        (identifier)
-        (identifier)
-        (identifier)))
+        (simple_path
+            (identifier))
+        (simple_path
+            (identifier)
+            (simple_path
+                (identifier)))))
 
+==============
+Complex Export
+==============
+
+export {
+    foo<wew::lad>::bar,
+};
+
+---
+
+(source_file
+    (export_item
+        (simple_path
+            (identifier)
+            args: (generic_argument_list
+                (simple_path
+                    (identifier)
+                    (simple_path
+                        (identifier))))
+            (simple_path
+                (identifier)))))
 
 ======
 Struct
@@ -45,16 +112,20 @@ struct Chair<M: Material>(
         generics: (generic_parameter_list
             (generic_parameter
                 name: (identifier)
-                bounds: (identifier)))
+                bounds: (simple_path
+                    (identifier))))
         parameters: (struct_parameter_list
             (struct_parameter
-                type: (identifier))
+                type: (simple_path
+                    (identifier)))
             (struct_parameter
                 name: (identifier)
-                type: (identifier))
+                type: (simple_path
+                    (identifier)))
             (struct_parameter
                 name: (identifier)
-                type: (identifier)))))
+                type: (simple_path
+                    (identifier))))))
 
 =====
 Union
@@ -77,15 +148,18 @@ union Address {
                 parameters: (struct_parameter_list
                     (struct_parameter
                         name: (identifier)
-                        type: (identifier))
+                        type: (simple_path
+                            (identifier)))
                     (struct_parameter
                         name: (identifier)
-                        type: (identifier))))
+                        type: (simple_path
+                            (identifier)))))
             (union_variant
                 name: (identifier)
                 parameters: (struct_parameter_list
                         (struct_parameter
-                            type: (identifier))))
+                            type: (simple_path
+                                (identifier)))))
             (union_variant
                 name: (identifier)))))
 
@@ -123,9 +197,11 @@ module foo<Self> -> Foo {
         generics: (generic_parameter_list
             (generic_parameter
                 name: (identifier)))
-        return_type: (identifier)
+        return_type: (simple_path
+            (identifier))
         (function_item
             name: (identifier)
             parameters: (func_parameter_list)
-            return_type: (identifier)
+            return_type: (simple_path
+                (identifier))
             body: (block))))

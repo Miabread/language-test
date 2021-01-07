@@ -8,11 +8,11 @@
         "required": false,
         "types": [
           {
-            "type": "identifier",
+            "type": "number",
             "named": true
           },
           {
-            "type": "number",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -23,15 +23,45 @@
       "required": false,
       "types": [
         {
-          "type": "identifier",
-          "named": true
-        },
-        {
           "type": "let_statement",
           "named": true
         },
         {
           "type": "number",
+          "named": true
+        },
+        {
+          "type": "simple_path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "compound_path",
+    "named": true,
+    "fields": {
+      "args": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "generic_argument_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "compound_path",
+          "named": true
+        },
+        {
+          "type": "identifier",
           "named": true
         }
       ]
@@ -46,7 +76,7 @@
       "required": false,
       "types": [
         {
-          "type": "identifier",
+          "type": "simple_path",
           "named": true
         }
       ]
@@ -85,7 +115,7 @@
         "required": true,
         "types": [
           {
-            "type": "identifier",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -156,11 +186,26 @@
         "required": false,
         "types": [
           {
-            "type": "identifier",
+            "type": "simple_path",
             "named": true
           }
         ]
       }
+    }
+  },
+  {
+    "type": "generic_argument_list",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "simple_path",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -172,7 +217,7 @@
         "required": false,
         "types": [
           {
-            "type": "identifier",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -213,7 +258,7 @@
       "required": false,
       "types": [
         {
-          "type": "identifier",
+          "type": "compound_path",
           "named": true
         }
       ]
@@ -246,7 +291,7 @@
             "named": false
           },
           {
-            "type": "identifier",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -256,11 +301,11 @@
         "required": true,
         "types": [
           {
-            "type": "identifier",
+            "type": "number",
             "named": true
           },
           {
-            "type": "number",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -296,7 +341,7 @@
         "required": false,
         "types": [
           {
-            "type": "identifier",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -328,6 +373,36 @@
         },
         {
           "type": "union_item",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "simple_path",
+    "named": true,
+    "fields": {
+      "args": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "generic_argument_list",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "simple_path",
           "named": true
         }
       ]
@@ -423,7 +498,7 @@
         "required": true,
         "types": [
           {
-            "type": "identifier",
+            "type": "simple_path",
             "named": true
           }
         ]
@@ -543,6 +618,10 @@
     "named": false
   },
   {
+    "type": "::",
+    "named": false
+  },
+  {
     "type": ";",
     "named": false
   },
@@ -556,6 +635,10 @@
   },
   {
     "type": ">",
+    "named": false
+  },
+  {
+    "type": "as",
     "named": false
   },
   {

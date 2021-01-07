@@ -26,7 +26,8 @@ func main() -> U32 {
     (function_item
         name: (identifier)
         parameters: (func_parameter_list)
-        return_type: (identifier)
+        return_type: (simple_path
+            (identifier))
         body: (block
             trailing: (number))))
 
@@ -46,16 +47,20 @@ func main() -> U32 {
     (function_item
         name: (identifier)
         parameters: (func_parameter_list)
-        return_type: (identifier)
+        return_type: (simple_path
+            (identifier))
         body: (block
             (let_statement
                 name: (identifier)
-                type: (identifier)
+                type: (simple_path
+                    (identifier))
                 value: (number))
             (let_statement
                 name: (identifier)
-                value: (identifier))
-            trailing: (identifier))))
+                value: (simple_path
+                    (identifier)))
+            trailing: (simple_path
+                (identifier)))))
 
 ==========
 Parameters
@@ -71,15 +76,18 @@ func greet(person: String, from hometown: String, times 1234: Integer) {};
         parameters: (func_parameter_list
             (func_parameter
                 pattern: (identifier)
-                type: (identifier))
+                type: (simple_path
+                    (identifier)))
             (func_parameter
                 name: (identifier)
                 pattern: (identifier)
-                type: (identifier))
+                type: (simple_path
+                    (identifier)))
             (func_parameter
                 name: (identifier)
                 pattern: (number)
-                type: (identifier)))
+                type: (simple_path
+                    (identifier))))
         body: (block)))
 
 ========
@@ -98,9 +106,11 @@ func foo<T, U: V, W>() -> W {};
                 name: (identifier))
             (generic_parameter
                 name: (identifier)
-                bounds: (identifier))
+                bounds: (simple_path
+                    (identifier)))
             (generic_parameter
                 name: (identifier)))
         parameters: (func_parameter_list)
-        return_type: (identifier)
+        return_type: (simple_path
+            (identifier))
         body: (block)))

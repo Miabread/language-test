@@ -13,26 +13,44 @@ union Optional<T> {
 module default_some<T, impl: Default<T>> -> Default<Optional<T>> {
     func default() {
         Some(impl::default())
-    }
-}
+    };
+};
 
 module default_nothing<T> -> Default<Optional<T>> {
     func default() {
         Nothing
-    }
-}
+    };
+};
 
 module pointed_some -> Pointed<Optional<?>> {
     func of(value) {
         Some(value)
-    }
-}
+    };
+};
 
 module pointed_nothing -> Pointed<Optional<?>> {
     func of(_) {
         Nothing
-    }
-}
+    };
+};
+
+module functor -> Functor<Optional<?>> {
+    func map(self, fn) {
+        match(self) {
+            Some(value) -> Some(fn(value)),
+            Nothing -> Nothing,
+        }
+    };
+};
+
+module monad -> Monad<Optional<?>> {
+    func flat_map(self, fn) {
+        match(self) {
+            Some(value) -> fn(value),
+            Nothing -> Nothing,
+        }
+    };
+};
 
 func if<R>(condition: Boolean, body: func() -> R) -> Optional<R> {
     match(condition) {

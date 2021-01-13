@@ -31,13 +31,13 @@ assert_equals(True, not(False));
 The logical AND operator. Returns `True` only if both inputs are `True`.
 
 This function is similar to the common `&&` operator in other languages.
-Note that this function does not short-circuit.
+Note that the right argument is placed inside a block to enable short-circuiting behavior.
 
 ### Examples
 
 ```
-assert_equals(True, and(True, True));
-assert_equals(False, and(False, True));
+assert_equals(True, and(True) { True });
+assert_equals(False, and(False) { True });
 ```
 
 ## or()
@@ -45,12 +45,12 @@ assert_equals(False, and(False, True));
 The logical OR operator. Returns `True` if either inputs are `True`.
 
 This function is similar to the common `||` operator in other languages.
-Note that this function does not short-circuit.
+Note that the right argument is placed inside a block to enable short-circuiting behavior.
 
 ### Examples
 
 ```
-assert_equals(True, or(True, True));
-assert_equals(True, or(False, True));
-assert_equals(False, or(False, False));
+assert_equals(True, or(True) { True });
+assert_equals(True, or(False) { True });
+assert_equals(False, or(False)  { False });
 ```

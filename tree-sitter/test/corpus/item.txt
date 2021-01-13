@@ -2,23 +2,6 @@
 Import
 ======
 
-import { foo, bar::baz };
-
----
-
-(source_file
-    (import_item
-        (compound_path
-            (identifier))
-        (compound_path
-            (identifier)
-            (compound_path
-                (identifier)))))
-
-==============
-Complex Import
-==============
-
 import {
     sonance::core::{
         primitive::boolean::{Boolean, default as bool_default},
@@ -59,25 +42,9 @@ import {
 Export
 ======
 
-export { foo, bar::baz };
-
----
-
-(source_file
-    (export_item
-        (simple_path
-            (identifier))
-        (simple_path
-            (identifier)
-            (simple_path
-                (identifier)))))
-
-==============
-Complex Export
-==============
-
 export {
     foo<wew::lad>::bar,
+
 };
 
 ---
@@ -163,30 +130,12 @@ union Address {
             (union_variant
                 name: (identifier)))))
 
-=============
-Simple Module
-=============
+======
+Module
+======
 
-module foo {
-    func bar() {};
-};
-
----
-
-(source_file
-    (module_item
-        name: (identifier)
-        (function_item
-            name: (identifier)
-            parameters: (func_parameter_list)
-            body: (block))))
-
-==============
-Complex Module
-==============
-
-module foo<Self> -> Foo {
-    func bar() -> Self {};
+module foo<T> -> Foo {
+    func bar() -> T {};
 };
 
 ---

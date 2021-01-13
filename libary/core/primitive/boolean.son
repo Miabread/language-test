@@ -11,14 +11,14 @@ func not(self: Boolean) -> Boolean {
     }
 };
 
-func and(left: Boolean, right: Boolean) -> Boolean {
+func and(left: Boolean, right: func() -> Boolean) -> Boolean {
     match(left) {
         False -> False,
         True -> right,
     }
 };
 
-func or(left: Boolean, right: Boolean) -> Boolean {
+func or(left: Boolean, right: func() -> Boolean) -> Boolean {
     match(left) {
         True -> True,
         False -> right,

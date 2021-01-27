@@ -4,6 +4,10 @@
   "main": "index.js",
   "author": "JamesBeeProg <jamesbeeprog@gmail.com> (https://github.com/JamesBeeProg)",
   "license": "MIT",
+  "scripts": {
+    "build": "tree-sitter generate",
+    "test": "tree-sitter test"
+  },
   "dependencies": {
     "nan": "^2.14.2"
   },

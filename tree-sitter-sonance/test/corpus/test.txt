@@ -1,13 +1,74 @@
-=====
-Basic
-=====
+========
+Function
+========
 
-func sonance_main() -> U8 {
-    123
+@external()
+func sonance_main(foo: Foo, bar: Bar) -> U8 {
+    foo(123, 456);
+    123 bar()
 };
 
 ---
 
 (source_file
-    (identifier)
-    (number))
+    (attribute
+        (identifier)
+    )
+    (func_item
+        name: (identifier)
+        parameters: (parameter_list
+            (parameter
+                name: (identifier)
+                type: (identifier)
+            )
+            (parameter
+                name: (identifier)
+                type: (identifier)
+            )
+        )
+        return_type: (identifier)
+        body: (block
+            (call_expression
+                name: (identifier)
+                arguments: (argument_list
+                    (number)
+                    (number)
+                )
+            )
+            (call_expression
+                leading: (number)
+                name: (identifier)
+                arguments: (argument_list)
+            )
+        )
+    )
+)
+
+======
+Import
+======
+
+@external()
+import {
+    func foo(bar: Bar) -> Unit;
+};
+
+---
+
+(source_file
+    (attribute
+        (identifier)
+    )
+    (import_item
+        (func_item
+            name: (identifier)
+            parameters: (parameter_list
+                (parameter
+                    name: (identifier)
+                    type: (identifier)
+                )
+            )
+            return_type: (identifier)
+        )
+    )
+)

@@ -1,0 +1,13 @@
+=====
+Basic
+=====
+
+func sonance_main() -> U8 {
+    123
+};
+
+---
+
+(source_file
+    (identifier)
+    (number))

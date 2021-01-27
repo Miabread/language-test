@@ -1,0 +1,13 @@
+{
+  "name": "tree-sitter-sonance",
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "JamesBeeProg <jamesbeeprog@gmail.com> (https://github.com/JamesBeeProg)",
+  "license": "MIT",
+  "dependencies": {
+    "nan": "^2.14.2"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.18.0"
+  }
+}

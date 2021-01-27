@@ -3,4 +3,5 @@
 members = [
     "compiler",
     "libsonance",
+    "syntax",
 ]

@@ -1,0 +1,74 @@
+use { super::*, std::str::FromStr };
+
+grammar;
+
+match {
+    // Comments
+    r"//[^\n\r]*[\n\r]*" => { },
+    r"/\*([^\*]*\*+[^\*/])*([^\*]*\*+|[^\*])*\*/" => { },
+} else {
+    // Regex
+    r"[a-zA-Z_]\w*" => IDENTIFIER,
+    r"[+-]?\d+" => INTEGER,
+
+    // Keywords
+    "func", "import",
+
+    // Groups
+    "(", ")",
+    "{", "}",
+
+    // Punctuation
+    ",", ":", ";",
+    "@", "->",
+} else {
+    // Whitespace
+    r"\s*" => { },
+}
+
+#[inline]
+Boxed<T>: Box<T> = T => Box::new(<>);
+
+#[inline]
+List<T, S>: Vec<T> = {
+    <v:(<T> S)*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+};
+
+pub File: File = <items: Item*> => File { <> };
+
+Item: Item = {
+    ImportItem => Item::Import(<>),
+    FuncItem => Item::Func(<>),
+};
+
+Identifier: String = IDENTIFIER => <>.to_string();
+
+Attribute: Attribute = "@" <name: Identifier> "(" ")" => Attribute { <> };
+
+ImportItem: ImportItem =
+    <attributes: Attribute*>
+    "import" "{" <items: Item*> "}" ";"
+    => ImportItem { <> };
+
+Parameter: Parameter = <name: Identifier> ":" <ty: Identifier> => Parameter { <> };
+
+FuncItem: FuncItem =
+    <attributes: Attribute*>
+    "func" <name: Identifier>
+    "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier>
+    <body: ("{" <List<Expression, ";">> "}")?> ";"
+    => FuncItem { <> };
+
+Integer: u8 = INTEGER => u8::from_str(<>).unwrap();
+
+Expression: Expression = {
+    Integer => Expression::Integer(<>),
+    <leading: Boxed<Expression>?> <name: Identifier> "(" <arguments: List<Expression, ",">> ")" => Expression::Call { <> },
+};

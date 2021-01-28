@@ -2,9 +2,13 @@ use {
     cranelift::{codegen::binemit::NullTrapSink, prelude::*},
     cranelift_module::{Linkage, Module},
     cranelift_object::{ObjectBuilder, ObjectModule},
-    syntax::File,
     thiserror::Error,
 };
+
+pub struct File<'a> {
+    pub name: &'a str,
+    pub number: u8,
+}
 
 pub fn compile(input: &File) -> Result<Vec<u8>, CodegenError> {
     // Create a module using host configuration

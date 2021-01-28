@@ -10,6 +10,7 @@ match {
     // Regex
     r"[a-zA-Z_]\w*" => IDENTIFIER,
     r"[+-]?\d+" => INTEGER,
+    r#""(\\.|[^"\\])*""# => STRING,
 
     // Keywords
     "func", "external",
@@ -20,7 +21,7 @@ match {
 
     // Punctuation
     ",", "->",
-    ":", ";"
+    ":", ";", "@",
 } else {
     // Whitespace
     r"\s*" => { },
@@ -49,10 +50,13 @@ Item: Item = {
 };
 
 Identifier: String = IDENTIFIER => <>.to_string();
+String: String = STRING => <>.to_string();
 
-ExternalItem: ExternalItem = "external" "(" <protocol: Identifier> ")" "{" <items: (<FuncSignature> ";")*> "}" ";" => ExternalItem { <> };
+Attribute: Attribute = "@" <name: Identifier> "(" <arguments: List<String, ",">> ")" => Attribute { <> };
 
-FuncSignature: FuncSignature = "func" <name: Identifier> "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier> => FuncSignature { <> };
+ExternalItem: ExternalItem = <attributes: Attribute*> "external" "(" <protocol: String> ")" "{" <items: (<FuncSignature> ";")*> "}" ";" => ExternalItem { <> };
+
+FuncSignature: FuncSignature = <attributes: Attribute*> "func" <name: Identifier> "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier> => FuncSignature { <> };
 
 FuncItem: FuncItem = <signature: FuncSignature> <body: ("{" <List<Expression, ";">> "}")?> ";" => FuncItem { <> };
 

@@ -18,13 +18,21 @@ pub enum Item {
 }
 
 #[derive(Debug, Clone)]
+pub struct Attribute {
+    pub name: String,
+    pub arguments: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ExternalItem {
+    pub attributes: Vec<Attribute>,
     pub protocol: String,
     pub items: Vec<FuncSignature>,
 }
 
 #[derive(Debug, Clone)]
 pub struct FuncSignature {
+    pub attributes: Vec<Attribute>,
     pub name: String,
     pub parameters: Vec<Parameter>,
     pub return_ty: String,

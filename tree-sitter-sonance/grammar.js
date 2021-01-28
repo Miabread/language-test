@@ -53,9 +53,9 @@ module.exports = grammar({
             tokens.semi,
         ),
 
-                attribute: $ => seq(
+        attribute: $ => seq(
             tokens.at,
-            $.identifier,
+            field('name', $.identifier),
             parens(),
         ),
 
@@ -69,7 +69,7 @@ module.exports = grammar({
             field('name', $.identifier),
             field('parameters', $.parameter_list),
             tokens.arrow,
-            field('return_type', $._type),
+            field('return_ty', $._ty),
             optional(field('body', $.block)),
         ),
 
@@ -78,10 +78,10 @@ module.exports = grammar({
         parameter: $ => seq(
             field('name', $.identifier),
             tokens.colon,
-            field('type', $._type),
+            field('ty', $._ty),
         ),
 
-        _type: $ => choice(
+        _ty: $ => choice(
             $.identifier,
         ),
 

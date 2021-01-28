@@ -12,21 +12,21 @@ func sonance_main(foo: Foo, bar: Bar) -> U8 {
 
 (source_file
     (attribute
-        (identifier)
+        name: (identifier)
     )
     (func_item
         name: (identifier)
         parameters: (parameter_list
             (parameter
                 name: (identifier)
-                type: (identifier)
+                ty: (identifier)
             )
             (parameter
                 name: (identifier)
-                type: (identifier)
+                ty: (identifier)
             )
         )
-        return_type: (identifier)
+        return_ty: (identifier)
         body: (block
             (call_expression
                 name: (identifier)
@@ -57,7 +57,7 @@ import {
 
 (source_file
     (attribute
-        (identifier)
+        name: (identifier)
     )
     (import_item
         (func_item
@@ -65,10 +65,10 @@ import {
             parameters: (parameter_list
                 (parameter
                     name: (identifier)
-                    type: (identifier)
+                    ty: (identifier)
                 )
             )
-            return_type: (identifier)
+            return_ty: (identifier)
         )
     )
 )

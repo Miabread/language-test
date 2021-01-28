@@ -1,38 +1,22 @@
-use tree_sitter::{Language, Parser};
+pub mod data;
+pub mod error;
+pub mod walk;
 
-pub use tree_sitter::Tree;
+pub use error::ParseError;
+
+pub type Result<'a, T, E = ParseError<'a>> = std::result::Result<T, E>;
+
+use tree_sitter::{Language, Parser};
 
 extern "C" {
     fn tree_sitter_sonance() -> Language;
 }
 
-#[derive(Debug, Clone)]
-pub struct File<'a> {
-    pub name: &'a str,
-    pub number: u8,
-}
-
-pub fn parse(source: &[u8]) -> File {
+pub fn parse(source: &[u8]) -> Result<data::File> {
     let mut parser = Parser::new();
     parser
         .set_language(unsafe { tree_sitter_sonance() })
         .unwrap();
     let tree = parser.parse(source, None).unwrap();
-
-    File {
-        name: tree
-            .root_node()
-            .named_child(0)
-            .unwrap()
-            .utf8_text(source)
-            .unwrap(),
-        number: tree
-            .root_node()
-            .named_child(1)
-            .unwrap()
-            .utf8_text(source)
-            .unwrap()
-            .parse()
-            .unwrap(),
-    }
+    walk::file(tree.walk(), source)
 }

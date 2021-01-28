@@ -1,4 +1,4 @@
-lalrpop_util::lalrpop_mod!(#[allow(clippy::all)] pub grammar, "/syntax/grammar.rs");
+lalrpop_util::lalrpop_mod!(#[allow(clippy::all)] pub grammar, "/p1_syntax/grammar.rs");
 
 pub fn parse(input: &'_ str) -> Result<File, String> {
     grammar::FileParser::new()
@@ -13,27 +13,26 @@ pub struct File {
 
 #[derive(Debug, Clone)]
 pub enum Item {
-    Import(ImportItem),
+    External(ExternalItem),
     Func(FuncItem),
 }
 
 #[derive(Debug, Clone)]
-pub struct Attribute {
-    pub name: String,
+pub struct ExternalItem {
+    pub protocol: String,
+    pub items: Vec<FuncSignature>,
 }
 
 #[derive(Debug, Clone)]
-pub struct ImportItem {
-    pub attributes: Vec<Attribute>,
-    pub items: Vec<Item>,
+pub struct FuncSignature {
+    pub name: String,
+    pub parameters: Vec<Parameter>,
+    pub return_ty: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct FuncItem {
-    pub attributes: Vec<Attribute>,
-    pub name: String,
-    pub parameters: Vec<Parameter>,
-    pub return_ty: String,
+    pub signature: FuncSignature,
     pub body: Option<Vec<Expression>>,
 }
 

@@ -12,15 +12,15 @@ match {
     r"[+-]?\d+" => INTEGER,
 
     // Keywords
-    "func", "import",
+    "func", "external",
 
     // Groups
     "(", ")",
     "{", "}",
 
     // Punctuation
-    ",", ":", ";",
-    "@", "->",
+    ",", "->",
+    ":", ";"
 } else {
     // Whitespace
     r"\s*" => { },
@@ -44,27 +44,19 @@ List<T, S>: Vec<T> = {
 pub File: File = <items: Item*> => File { <> };
 
 Item: Item = {
-    ImportItem => Item::Import(<>),
+    ExternalItem => Item::External(<>),
     FuncItem => Item::Func(<>),
 };
 
 Identifier: String = IDENTIFIER => <>.to_string();
 
-Attribute: Attribute = "@" <name: Identifier> "(" ")" => Attribute { <> };
+ExternalItem: ExternalItem = "external" "(" <protocol: Identifier> ")" "{" <items: (<FuncSignature> ";")*> "}" ";" => ExternalItem { <> };
 
-ImportItem: ImportItem =
-    <attributes: Attribute*>
-    "import" "{" <items: Item*> "}" ";"
-    => ImportItem { <> };
+FuncSignature: FuncSignature = "func" <name: Identifier> "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier> => FuncSignature { <> };
+
+FuncItem: FuncItem = <signature: FuncSignature> <body: ("{" <List<Expression, ";">> "}")?> ";" => FuncItem { <> };
 
 Parameter: Parameter = <name: Identifier> ":" <ty: Identifier> => Parameter { <> };
-
-FuncItem: FuncItem =
-    <attributes: Attribute*>
-    "func" <name: Identifier>
-    "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier>
-    <body: ("{" <List<Expression, ";">> "}")?> ";"
-    => FuncItem { <> };
 
 Integer: u8 = INTEGER => u8::from_str(<>).unwrap();
 

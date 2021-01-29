@@ -13,7 +13,7 @@ match {
     r#""(\\.|[^"\\])*""# => STRING,
 
     // Keywords
-    "func", "external", "alias",
+    "func", "external", "type",
 
     // Groups
     "(", ")",
@@ -45,7 +45,7 @@ List<T, S>: Vec<T> = {
 pub File: File = <items: Item*> => File { <> };
 
 Item: Item = {
-    AliasItem => Item::Alias(<>),
+    TyItem => Item::Ty(<>),
     ExternalItem => Item::External(<>),
     FuncItem => Item::Func(<>),
 };
@@ -55,7 +55,7 @@ String: String = STRING => <>.to_string();
 
 Attribute: Attribute = "@" <name: Identifier> "(" <arguments: List<String, ",">> ")" => Attribute { <> };
 
-AliasItem: AliasItem = <attributes: Attribute*> "alias" <name: Identifier> ":" <item_ty: Identifier> <value: ("=" <Identifier>)?> => AliasItem { <> };
+TyItem: TyItem = <attributes: Attribute*> "type" <name: Identifier> ";" => TyItem { <> };
 
 ExternalItem: ExternalItem = <attributes: Attribute*> "external" "(" <protocol: String> ")" "{" <items: (<FuncSignature> ";")*> "}" ";" => ExternalItem { <> };
 

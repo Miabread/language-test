@@ -50,12 +50,12 @@ Item: Item = {
     FuncItem => Item::Func(<>),
 };
 
-Identifier: String = IDENTIFIER => <>.to_string();
-String: String = STRING => <>.to_string();
+Identifier: String = IDENTIFIER => <>.to_owned();
+String: String = STRING => { let s = <>; s[1..s.len()-1].to_owned() };
 
 Attribute: Attribute = "@" <name: Identifier> "(" <arguments: List<String, ",">> ")" => Attribute { <> };
 
-ExternalItem: ExternalItem = <attributes: Attribute*> "external" "(" <protocol: String> ")" "{" <items: (<Item> ";")*> "}" ";" => ExternalItem { <> };
+ExternalItem: ExternalItem = <attributes: Attribute*> "external" "(" <protocol: String> ")" "{" <items: Item*> "}" ";" => ExternalItem { <> };
 
 TyItem: TyItem = <attributes: Attribute*> "type" <name: Identifier> ";" => TyItem { <> };
 

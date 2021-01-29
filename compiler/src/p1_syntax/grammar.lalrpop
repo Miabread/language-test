@@ -45,8 +45,8 @@ List<T, S>: Vec<T> = {
 pub File: File = <items: Item*> => File { <> };
 
 Item: Item = {
-    TyItem => Item::Ty(<>),
     ExternalItem => Item::External(<>),
+    TyItem => Item::Ty(<>),
     FuncItem => Item::Func(<>),
 };
 
@@ -55,13 +55,11 @@ String: String = STRING => <>.to_string();
 
 Attribute: Attribute = "@" <name: Identifier> "(" <arguments: List<String, ",">> ")" => Attribute { <> };
 
+ExternalItem: ExternalItem = <attributes: Attribute*> "external" "(" <protocol: String> ")" "{" <items: (<Item> ";")*> "}" ";" => ExternalItem { <> };
+
 TyItem: TyItem = <attributes: Attribute*> "type" <name: Identifier> ";" => TyItem { <> };
 
-ExternalItem: ExternalItem = <attributes: Attribute*> "external" "(" <protocol: String> ")" "{" <items: (<FuncSignature> ";")*> "}" ";" => ExternalItem { <> };
-
-FuncSignature: FuncSignature = <attributes: Attribute*> "func" <name: Identifier> "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier> => FuncSignature { <> };
-
-FuncItem: FuncItem = <signature: FuncSignature> <body: ("{" <List<Expression, ";">> "}")?> ";" => FuncItem { <> };
+FuncItem: FuncItem = <attributes: Attribute*> "func" <name: Identifier> "(" <parameters: List<Parameter, ",">> ")" "->" <return_ty: Identifier> <body: ("{" <List<Expression, ";">> "}")?> ";" => FuncItem { <> };
 
 Parameter: Parameter = <name: Identifier> ":" <ty: Identifier> => Parameter { <> };
 

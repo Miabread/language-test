@@ -13,8 +13,8 @@ pub struct File {
 
 #[derive(Debug, Clone)]
 pub enum Item {
-    Ty(TyItem),
     External(ExternalItem),
+    Ty(TyItem),
     Func(FuncItem),
 }
 
@@ -25,29 +25,24 @@ pub struct Attribute {
 }
 
 #[derive(Debug, Clone)]
+pub struct ExternalItem {
+    pub attributes: Vec<Attribute>,
+    pub protocol: String,
+    pub items: Vec<Item>,
+}
+
+#[derive(Debug, Clone)]
 pub struct TyItem {
     pub attributes: Vec<Attribute>,
     pub name: String,
 }
 
 #[derive(Debug, Clone)]
-pub struct ExternalItem {
-    pub attributes: Vec<Attribute>,
-    pub protocol: String,
-    pub items: Vec<FuncSignature>,
-}
-
-#[derive(Debug, Clone)]
-pub struct FuncSignature {
+pub struct FuncItem {
     pub attributes: Vec<Attribute>,
     pub name: String,
     pub parameters: Vec<Parameter>,
     pub return_ty: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct FuncItem {
-    pub signature: FuncSignature,
     pub body: Option<Vec<Expression>>,
 }
 

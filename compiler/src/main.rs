@@ -1,6 +1,6 @@
 use {
     clap::Clap,
-    compiler::p1_syntax::parse,
+    compiler::compile,
     std::{env, fs},
 };
 
@@ -19,7 +19,7 @@ fn main() {
 
     let input = fs::read_to_string(cwd.join(settings.input)).expect("couldn't read source file");
 
-    let _ = dbg!(parse(&input));
+    let _ = dbg!(compile(&input));
 
     // let compiled = match compile(&input) {
     //     Ok(compiled) => compiled,

@@ -13,6 +13,7 @@ pub struct File {
 
 #[derive(Debug, Clone)]
 pub enum Item {
+    Alias(AliasItem),
     External(ExternalItem),
     Func(FuncItem),
 }
@@ -21,6 +22,14 @@ pub enum Item {
 pub struct Attribute {
     pub name: String,
     pub arguments: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct AliasItem {
+    pub attributes: Vec<Attribute>,
+    pub name: String,
+    pub item_ty: String,
+    pub value: Option<String>,
 }
 
 #[derive(Debug, Clone)]

@@ -4,7 +4,7 @@ pub mod error;
 use crate::p1_syntax as syntax;
 pub use {data::*, error::*};
 
-pub fn find_items(input: syntax::File) -> Result<Program> {
+pub fn check_items(input: syntax::File) -> Result<Program> {
     let mut program = Program::default();
 
     for item in input.items {

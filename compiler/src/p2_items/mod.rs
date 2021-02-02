@@ -73,11 +73,15 @@ fn visit_external_func(
     program: &mut Program,
 ) -> Result<(), ItemsError> {
     fn get_type(ty_name: String, func_name: &str, program: &mut Program) -> Result<TyItemRef> {
-        TyItemRef::new(ty_name.clone(), &program.tys).ok_or_else(|| ItemsError::UnknownTy {
-            ty_name,
-            item_name: func_name.to_owned(),
-            item_ty: "func".to_owned(),
-        })
+        if !program.tys.contains_key(&ty_name) {
+            return Err(ItemsError::UnknownTy {
+                ty_name,
+                item_name: func_name.to_owned(),
+                item_ty: "func".to_owned(),
+            });
+        }
+
+        Ok(TyItemRef(ty_name))
     }
 
     if func.body.is_some() {
@@ -113,11 +117,15 @@ fn visit_external_func(
 
 fn visit_func(func: syntax::FuncItem, program: &mut Program) -> Result<(), ItemsError> {
     fn get_type(ty_name: String, func_name: &str, program: &mut Program) -> Result<TyItemRef> {
-        TyItemRef::new(ty_name.clone(), &program.tys).ok_or_else(|| ItemsError::UnknownTy {
-            ty_name,
-            item_name: func_name.to_owned(),
-            item_ty: "func".to_owned(),
-        })
+        if !program.tys.contains_key(&ty_name) {
+            return Err(ItemsError::UnknownTy {
+                ty_name,
+                item_name: func_name.to_owned(),
+                item_ty: "func".to_owned(),
+            });
+        }
+
+        Ok(TyItemRef(ty_name))
     }
 
     let name = func.name;

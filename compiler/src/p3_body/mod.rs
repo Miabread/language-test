@@ -13,8 +13,12 @@ pub fn check_bodies(items: items::Program) -> Result<Program> {
 
     for item in &program.items.funcs {
         if let (name, items::FuncItem::Local(func)) = item {
-            let signature = FuncItemRef::new(name.clone(), &program.items.funcs)
-                .expect("func should exist at this point.");
+            let name = name.clone();
+            if !program.items.funcs.contains_key(&name) {
+                panic!("func should exist at this point.")
+            }
+
+            let signature = FuncItemRef(name);
             let body = func
                 .body
                 .iter()
@@ -35,9 +39,12 @@ fn visit_expression(expr: &syntax::Expression, items: &items::Program) -> Result
             arguments,
             name,
         } => {
-            let name = FuncItemRef::new(name.clone(), &items.funcs)
-                .ok_or_else(|| BodyError::UnknownCall { name: name.clone() })?;
+            let name = name.clone();
+            if !items.funcs.contains_key(&name) {
+                return Err(BodyError::UnknownCall { name });
+            }
 
+            let name = FuncItemRef(name);
             let arguments = arguments
                 .iter()
                 .map(|expr| visit_expression(expr, items))

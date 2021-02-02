@@ -15,21 +15,7 @@ pub struct Program {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct TyItemRef(String);
-
-impl TyItemRef {
-    pub fn new(name: String, tys: &HashMap<String, TyItem>) -> Option<Self> {
-        if tys.contains_key(&name) {
-            Some(TyItemRef(name))
-        } else {
-            None
-        }
-    }
-
-    pub fn get<'a>(&'a self, tys: &'a HashMap<String, TyItem>) -> &'a TyItem {
-        &tys[&self.0]
-    }
-}
+pub struct TyItemRef(pub String);
 
 #[derive(Debug, Clone)]
 pub enum TyItem {

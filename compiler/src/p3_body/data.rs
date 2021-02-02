@@ -1,5 +1,4 @@
 use crate::p2_items as items;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Program {
@@ -8,21 +7,7 @@ pub struct Program {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct FuncItemRef(String);
-
-impl FuncItemRef {
-    pub fn new(name: String, funcs: &HashMap<String, items::FuncItem>) -> Option<Self> {
-        if funcs.contains_key(&name) {
-            Some(FuncItemRef(name))
-        } else {
-            None
-        }
-    }
-
-    pub fn get<'a>(&'a self, funcs: &'a HashMap<String, items::FuncItem>) -> &'a items::FuncItem {
-        &funcs[&self.0]
-    }
-}
+pub struct FuncItemRef(pub String);
 
 #[derive(Debug, Clone)]
 pub struct FuncBody {

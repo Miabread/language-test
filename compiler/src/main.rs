@@ -1,40 +1,44 @@
-use {
-    clap::Clap,
-    compiler::compile,
-    std::{env, fs},
+use clap::Clap;
+use std::{
+    env, fs,
+    io::{self, Write},
 };
 
 #[derive(Debug, Clone, Clap)]
 #[clap(version = "0.1.0", author = "jamesBeeProg <jamesBeeProg@gmail.com>")]
 struct Settings {
-    #[clap(default_value = "indev/input.son")]
-    input: String,
-    #[clap(default_value = "indev/output.o")]
-    output: String,
+    input: Option<String>,
 }
 
 fn main() {
-    let cwd = env::current_dir().expect("couldn't get current dir");
     let settings = Settings::parse();
 
-    let input = fs::read_to_string(cwd.join(settings.input)).expect("couldn't read source file");
+    if let Some(input) = settings.input {
+        run_file(input);
+    } else {
+        run_repl();
+    }
+}
 
-    let _ = dbg!(compile(&input));
+fn run_file(input: String) {
+    let cwd = env::current_dir().expect("couldn't get current dir");
+    let input = fs::read_to_string(cwd.join(input)).expect("couldn't read source file");
+    compiler::run(&input);
+}
 
-    // let compiled = match compile(&input) {
-    //     Ok(compiled) => compiled,
-    //     Err(error) => {
-    //         eprintln!("Error: {}", error);
-    //         return;
-    //     }
-    // };
+fn run_repl() {
+    loop {
+        print!(">");
+        io::stdout().flush().unwrap();
 
-    // fs::OpenOptions::new()
-    //     .create(true)
-    //     .write(true)
-    //     .truncate(true)
-    //     .open(cwd.join(settings.output))
-    //     .unwrap()
-    //     .write_all(&compiled)
-    //     .unwrap();
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+        let input = input.trim();
+
+        if input == "//exit" {
+            break;
+        }
+
+        compiler::run(input);
+    }
 }

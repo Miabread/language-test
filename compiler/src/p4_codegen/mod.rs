@@ -25,7 +25,30 @@ pub fn compile(input: body::Program) -> Result<Vec<u8>> {
 
     visit_func_items(&mut context)?;
 
+    visit_func_bodies(&input.func_bodies, &mut context)?;
+
     Ok(context.module.finish().emit()?)
+}
+
+fn visit_func_bodies(bodies: &[body::FuncBody], context: &mut CodegenContext) -> Result<()> {
+    let mut ctx = context.module.make_context();
+    let mut builder_context = FunctionBuilderContext::new();
+
+    for func in bodies {
+        ctx.func.signature = context.funcs[&func.signature.0].signature.clone();
+
+        let mut builder = FunctionBuilder::new(&mut ctx.func, &mut builder_context);
+
+        let block = builder.create_block();
+
+        builder.append_block_params_for_function_params(block);
+        builder.switch_to_block(block);
+        builder.seal_block(block);
+
+        context.module.clear_context(&mut ctx);
+    }
+
+    Ok(())
 }
 
 fn visit_func_items(context: &mut CodegenContext) -> Result<()> {
@@ -45,7 +68,9 @@ fn visit_func_items(context: &mut CodegenContext) -> Result<()> {
                     .module
                     .declare_function(&name, Linkage::Export, &signature)?;
 
-                context.funcs.insert(name.to_owned(), id);
+                context
+                    .funcs
+                    .insert(name.to_owned(), BackendFunc { id, signature });
             }
             items::FuncItem::External(func) => {
                 let mut signature = context.module.make_signature();
@@ -61,17 +86,25 @@ fn visit_func_items(context: &mut CodegenContext) -> Result<()> {
                     .module
                     .declare_function(&name, Linkage::Import, &signature)?;
 
-                context.funcs.insert(name.to_owned(), id);
+                context
+                    .funcs
+                    .insert(name.to_owned(), BackendFunc { id, signature });
             }
         }
     }
     Ok(())
 }
 
+#[derive(Debug, Clone)]
+struct BackendFunc {
+    id: FuncId,
+    signature: Signature,
+}
+
 struct CodegenContext {
     items: items::Program,
     tys: HashMap<String, Type>,
-    funcs: HashMap<String, FuncId>,
+    funcs: HashMap<String, BackendFunc>,
     module: ObjectModule,
 }
 

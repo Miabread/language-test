@@ -23,12 +23,13 @@ fn main() {
 fn run_file(input: String) {
     let cwd = env::current_dir().expect("couldn't get current dir");
     let input = fs::read_to_string(cwd.join(input)).expect("couldn't read source file");
+    println!();
     compiler::run(&input);
 }
 
 fn run_repl() {
     loop {
-        print!(">");
+        print!("> ");
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
@@ -39,6 +40,8 @@ fn run_repl() {
             break;
         }
 
+        println!();
         compiler::run(input);
+        println!();
     }
 }

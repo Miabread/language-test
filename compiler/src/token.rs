@@ -1,8 +1,9 @@
+use crate::error::{Report, ReportFormatter, Span};
+
 #[derive(Debug, Clone)]
 pub struct Token<'src> {
     pub kind: TokenKind<'src>,
-    pub start: usize,
-    pub end: usize,
+    pub span: Span,
 }
 
 // Note: variant order should be the same as match order in scan()
@@ -21,13 +22,7 @@ pub enum TokenKind<'src> {
     Identifier(&'src str),
 }
 
-#[derive(Debug, Clone)]
-pub enum ScanError {
-    UnterminatedString { start: usize },
-    UnknownCharacter { position: usize },
-}
-
-pub fn scan(source: &str) -> Result<Vec<Token<'_>>, Vec<ScanError>> {
+pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     let mut chars = source.char_indices().peekable();
     let mut tokens = Vec::new();
     let mut errors = Vec::new();
@@ -80,8 +75,10 @@ pub fn scan(source: &str) -> Result<Vec<Token<'_>>, Vec<ScanError>> {
                 );
 
                 tokens.push(Token {
-                    start: char.0,
-                    end: last.0,
+                    span: Span {
+                        start: char.0,
+                        end: last.0,
+                    },
                     kind,
                 });
                 continue;
@@ -105,8 +102,10 @@ pub fn scan(source: &str) -> Result<Vec<Token<'_>>, Vec<ScanError>> {
                 let kind = TokenKind::String(&source[char.0 + 1..closing.0]);
 
                 tokens.push(Token {
-                    start: char.0,
-                    end: closing.0,
+                    span: Span {
+                        start: char.0,
+                        end: closing.0,
+                    },
                     kind,
                 });
                 continue;
@@ -133,8 +132,10 @@ pub fn scan(source: &str) -> Result<Vec<Token<'_>>, Vec<ScanError>> {
                 };
 
                 tokens.push(Token {
-                    start: char.0,
-                    end: last.0,
+                    span: Span {
+                        start: char.0,
+                        end: last.0,
+                    },
                     kind,
                 });
                 continue;
@@ -149,15 +150,46 @@ pub fn scan(source: &str) -> Result<Vec<Token<'_>>, Vec<ScanError>> {
 
         // All single char tokens are handled down here
         tokens.push(Token {
-            start: char.0,
-            end: char.0,
+            span: Span {
+                start: char.0,
+                end: char.0,
+            },
             kind,
         })
     }
 
-    if errors.is_empty() {
-        Ok(tokens)
-    } else {
-        Err(errors)
+    (tokens, errors)
+}
+
+#[derive(Debug, Clone)]
+pub enum ScanError {
+    UnterminatedString { start: usize },
+    UnknownCharacter { position: usize },
+}
+
+impl Report for ScanError {
+    fn report(&self, fmt: &mut ReportFormatter<'_>) {
+        match self {
+            ScanError::UnterminatedString { start } => {
+                fmt.error("Unterminated string");
+                fmt.span(
+                    Span {
+                        start: *start,
+                        end: fmt.source_end(),
+                    },
+                    "expected closing quote, found end of file",
+                );
+            }
+            ScanError::UnknownCharacter { position } => {
+                fmt.error("Unknown character");
+                fmt.span(
+                    Span {
+                        start: *position,
+                        end: *position,
+                    },
+                    "",
+                );
+            }
+        }
     }
 }

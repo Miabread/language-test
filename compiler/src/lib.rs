@@ -1,6 +1,13 @@
+pub mod error;
 pub mod token;
 
 pub fn run(source: &str) {
-    let tokens = token::scan(source);
-    let _ = dbg!(tokens);
+    let (tokens, errors) = token::scan(source);
+
+    if !errors.is_empty() {
+        error::report(source, errors);
+        return;
+    }
+
+    dbg!(tokens);
 }

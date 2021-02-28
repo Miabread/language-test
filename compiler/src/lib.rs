@@ -1,4 +1,5 @@
 pub mod error;
+pub mod parser;
 pub mod token;
 
 pub fn run(source: &str) {
@@ -10,5 +11,10 @@ pub fn run(source: &str) {
         return;
     }
 
-    dbg!(tokens);
+    let parsed = parser::parse(tokens.into_iter());
+
+    match parsed {
+        Ok(f) => println!("{:?}", f),
+        Err(e) => error::Reporter::new(source).report(&[e.into()]),
+    }
 }

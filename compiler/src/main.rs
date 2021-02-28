@@ -7,16 +7,30 @@ use std::{
 #[derive(Debug, Clone, Clap)]
 #[clap(version = "0.1.0", author = "jamesBeeProg <jamesBeeProg@gmail.com>")]
 struct Settings {
-    input: Option<String>,
+    #[clap(subcommand)]
+    sub: SubCommand,
+}
+
+#[derive(Debug, Clone, Clap)]
+enum SubCommand {
+    Run {
+        input: String,
+    },
+    Repl,
+    ErrorTest {
+        input: String,
+        start: usize,
+        end: usize,
+    },
 }
 
 fn main() {
     let settings = Settings::parse();
 
-    if let Some(input) = settings.input {
-        run_file(input);
-    } else {
-        run_repl();
+    match settings.sub {
+        SubCommand::Run { input } => run_file(input),
+        SubCommand::Repl => run_repl(),
+        SubCommand::ErrorTest { input, start, end } => run_error_test(input, start, end),
     }
 }
 
@@ -44,4 +58,14 @@ fn run_repl() {
         compiler::run(input);
         println!();
     }
+}
+
+fn run_error_test(input: String, start: usize, end: usize) {
+    let cwd = env::current_dir().expect("couldn't get current dir");
+    let input = fs::read_to_string(cwd.join(input)).expect("couldn't read source file");
+
+    use compiler::error::*;
+
+    Reporter::new(&input)
+        .report(&[Citation::error("Test error".to_owned()).span(Span { start, end }, None)]);
 }

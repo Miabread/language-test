@@ -55,33 +55,28 @@ impl<'src> Reporter<'src> {
         let line = self.source.lines().nth(span.line_number_start - 1).unwrap();
 
         // Needed to pad all numbers to same length
-        let number_width = span.line_number_end.to_string().len();
+        let side_width = span.line_number_end.to_string().len();
 
-        // Source code line
-        eprintln!(
-            "{} {}",
-            // Line number + side bar
-            format!("{:1$} |", span.line_number_start, number_width)
-                .cyan()
-                .bold(),
-            line,
-        );
+        // Start padding
+        self.blank_side(side_width);
+        self.new_line();
+
+        // Source line
+        self.line_number_side(span.line_number_start, side_width);
+        self.line(line);
+        self.new_line();
 
         // Label line
-        eprintln!(
-            "{} {}{} {}",
-            // Sidebar
-            format!("{:1$} |", "", number_width).cyan().bold(),
-            // Pad the label
-            " ".repeat(span.local_start),
-            // Label the source, label must have max of 1 for when span is single char
-            "^".repeat((span.local_end - span.local_start).max(1)).red(),
-            if let Some(msg) = &label.message {
-                msg.red()
-            } else {
-                "".red()
-            }
-        );
+        self.blank_side(side_width);
+        self.repeat(" ", span.local_start);
+        // Columns are zero indexed, must +1 for correct alignment
+        self.repeat("^".red().bold(), span.local_end - span.local_start + 1);
+        self.message(&label.message);
+        self.new_line();
+
+        // End padding
+        self.blank_side(side_width);
+        self.new_line();
     }
 
     fn multi_line(&self, label: &SpanLabel, span: &ResolvedSpan) {
@@ -97,62 +92,90 @@ impl<'src> Reporter<'src> {
             .peekable();
 
         // Needed to pad all numbers to same length
-        let number_width = span.line_number_end.to_string().len();
+        let side_width = span.line_number_end.to_string().len();
 
-        for (num, line) in lines {
-            // When first line
-            if num == span.line_number_start {
-                eprintln!(
-                    "{}   {}",
-                    // Line number + side bar
-                    format!("{:1$} |", span.line_number_start, number_width)
-                        .cyan()
-                        .bold(),
-                    line,
-                );
-                eprintln!(
-                    "{}  {}",
-                    // Side bar
-                    format!("{:1$} |", "", number_width).cyan().bold(),
-                    format!("{}^", "_".repeat(span.local_start + 1)).red(),
-                );
+        for (line_number, line) in lines {
+            if line_number == span.line_number_start {
+                // Start padding
+                self.blank_side(side_width);
+                self.new_line();
+
+                // Source line
+                self.line_number_side(line_number, side_width);
+                self.error_bar_align();
+                self.line(line);
+                self.new_line();
+
+                // Start label line
+                self.blank_side(side_width);
+                self.error_bar_align();
+                self.repeat("_".bold().red(), span.local_start + 1);
+                eprint!("{}", "^".bold().red());
+                self.new_line();
+            } else if line_number == span.line_number_end {
+                // Source line
+                self.line_number_side(line_number, side_width);
+                self.error_bar();
+                self.line(line);
+                self.new_line();
+
+                // End label line
+                self.blank_side(side_width);
+                self.error_bar();
+                self.repeat("_".bold().red(), span.local_end + 1);
+                eprint!("{}", "^".bold().red());
+                self.message(&label.message);
+                self.new_line();
+
+                // End padding
+                self.blank_side(side_width);
+                self.new_line();
+            } else {
+                // Source line
+                self.line_number_side(line_number, side_width);
+                self.error_bar();
+                self.line(line);
+                self.new_line();
             }
-            // When last line
-            else if num == span.line_number_end {
-                eprintln!(
-                    "{} {} {}",
-                    // Line number + side bar
-                    format!("{:1$} |", span.line_number_end, number_width)
-                        .cyan()
-                        .bold(),
-                    // Error bar
-                    "|".red(),
-                    line,
-                );
-                eprintln!(
-                    "{} {} {}",
-                    // Side bar
-                    format!("{:1$} |", "", number_width).cyan().bold(),
-                    // Error bar + label
-                    format!("|{}^", "_".repeat(span.local_end + 1)).red(),
-                    if let Some(msg) = &label.message {
-                        msg.red()
-                    } else {
-                        "".red()
-                    },
-                );
-            }
-            // When in between line
-            else {
-                eprintln!(
-                    "{} {} {}",
-                    // Line number + side bar
-                    format!("{:1$} |", num, number_width).cyan().bold(),
-                    // Error bar
-                    "|".red(),
-                    line,
-                );
-            }
+        }
+    }
+
+    fn new_line(&self) {
+        eprintln!();
+    }
+
+    fn line_number_side(&self, line_number: usize, side_width: usize) {
+        eprint!(
+            "{}",
+            format!("{:1$} |", line_number, side_width).cyan().bold()
+        );
+    }
+
+    fn blank_side(&self, side_width: usize) {
+        eprint!("{}", format!("{:1$} |", "", side_width).cyan().bold());
+    }
+
+    fn line(&self, line: &str) {
+        eprint!(" {}", line);
+    }
+
+    fn error_bar_align(&self) {
+        eprint!("  ");
+    }
+
+    fn error_bar(&self) {
+        eprint!("{}", " |".red().bold());
+    }
+
+    fn repeat(&self, text: impl std::fmt::Display, times: usize) {
+        for _ in 0..times {
+            eprint!("{}", text);
+        }
+    }
+
+    fn message(&self, message: &Option<String>) {
+        if let Some(msg) = message {
+            eprint!("{}", msg.red().bold())
         }
     }
 

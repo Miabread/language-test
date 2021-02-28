@@ -1,4 +1,4 @@
-use crate::error::{Report, ReportFormatter, Span};
+use crate::error::Span;
 
 #[derive(Debug, Clone)]
 pub struct Token<'src> {
@@ -143,7 +143,7 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
 
             // Handle unknown char
             _ => {
-                errors.push(ScanError::UnknownCharacter { position: char.0 });
+                errors.push(ScanError::InvalidCharacter { position: char.0 });
                 continue;
             }
         };
@@ -164,31 +164,27 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
 #[derive(Debug, Clone)]
 pub enum ScanError {
     UnterminatedString { start: usize },
-    UnknownCharacter { position: usize },
+    InvalidCharacter { position: usize },
 }
 
-impl Report for ScanError {
-    fn report(&self, fmt: &mut ReportFormatter<'_>) {
-        match self {
+impl From<ScanError> for crate::error::Citation {
+    fn from(error: ScanError) -> Self {
+        use crate::error::Citation;
+        match error {
             ScanError::UnterminatedString { start } => {
-                fmt.error("Unterminated string");
-                fmt.span(
-                    Span {
-                        start: *start,
-                        end: fmt.source_end(),
-                    },
-                    "expected closing quote, found end of file",
-                );
+                Citation::error("Unterminated string".to_owned()).span(
+                    Span { start, end: start },
+                    Some("string starts here".to_owned()),
+                )
             }
-            ScanError::UnknownCharacter { position } => {
-                fmt.error("Unknown character");
-                fmt.span(
+            ScanError::InvalidCharacter { position } => {
+                Citation::error("Invalid character".to_owned()).span(
                     Span {
-                        start: *position,
-                        end: *position,
+                        start: position,
+                        end: position,
                     },
-                    "",
-                );
+                    None,
+                )
             }
         }
     }

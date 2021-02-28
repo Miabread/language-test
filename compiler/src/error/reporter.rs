@@ -1,11 +1,4 @@
-use colored::Colorize;
-
-/// A Span in some source code.
-#[derive(Debug, Clone)]
-pub struct Span {
-    pub start: usize,
-    pub end: usize,
-}
+use super::{util::LinesWithEndings, *};
 
 /// A Span that has more line information resolved. Used in error reporting.
 #[derive(Debug, Clone)]
@@ -18,41 +11,47 @@ struct ResolvedSpan {
     local_end: usize,
 }
 
-pub fn report(source: &str, errors: Vec<impl Report>) {
-    let mut fmt = ReportFormatter { source };
-    for error in errors {
-        error.report(&mut fmt);
-    }
-}
-
-pub trait Report {
-    fn report(&self, fmt: &mut ReportFormatter<'_>);
-}
-
 #[derive(Debug, Clone)]
-pub struct ReportFormatter<'src> {
+pub struct Reporter<'src> {
     source: &'src str,
 }
 
-impl<'src> ReportFormatter<'src> {
-    pub fn error(&self, message: &str) {
-        eprintln!("{} {}", "error:".red().bold(), message.bold());
+impl<'src> Reporter<'src> {
+    pub fn new(source: &'src str) -> Self {
+        Reporter { source }
     }
 
-    pub fn source_end(&self) -> usize {
-        self.source.len() - 1
-    }
-
-    pub fn span(&self, span: Span, message: &str) {
-        let span = self.resolve(span);
-        if span.line_number_start == span.line_number_end {
-            self.single_line(span, message);
-        } else {
-            self.multi_line(span, message);
+    pub fn report(&self, citations: &[Citation]) {
+        for citation in citations {
+            self.citation(citation);
+            for span in &citation.spans {
+                self.span(span);
+            }
         }
     }
 
-    fn single_line(&self, span: ResolvedSpan, message: &str) {
+    fn citation(&self, citation: &Citation) {
+        eprintln!(
+            "{} {}",
+            match citation.level {
+                Level::Error => "error:".red().bold(),
+                Level::Warning => "warning:".yellow().bold(),
+                Level::Info => "info:".blue().bold(),
+            },
+            citation.message,
+        );
+    }
+
+    fn span(&self, label: &SpanLabel) {
+        let span = &self.resolve(&label.span);
+        if span.line_number_start == span.line_number_end {
+            self.single_line(label, span);
+        } else {
+            self.multi_line(label, span);
+        }
+    }
+
+    fn single_line(&self, label: &SpanLabel, span: &ResolvedSpan) {
         let line = self.source.lines().nth(span.line_number_start - 1).unwrap();
 
         // Needed to pad all numbers to same length
@@ -77,11 +76,15 @@ impl<'src> ReportFormatter<'src> {
             " ".repeat(span.local_start),
             // Label the source, label must have max of 1 for when span is single char
             "^".repeat((span.local_end - span.local_start).max(1)).red(),
-            message.red(),
+            if let Some(msg) = &label.message {
+                msg.red()
+            } else {
+                "".red()
+            }
         );
     }
 
-    fn multi_line(&self, span: ResolvedSpan, message: &str) {
+    fn multi_line(&self, label: &SpanLabel, span: &ResolvedSpan) {
         let lines = self
             .source
             .lines()
@@ -132,7 +135,11 @@ impl<'src> ReportFormatter<'src> {
                     format!("{:1$} |", "", number_width).cyan().bold(),
                     // Error bar + label
                     format!("|{}^", "_".repeat(span.local_end + 1)).red(),
-                    message.red(),
+                    if let Some(msg) = &label.message {
+                        msg.red()
+                    } else {
+                        "".red()
+                    },
                 );
             }
             // When in between line
@@ -149,7 +156,7 @@ impl<'src> ReportFormatter<'src> {
         }
     }
 
-    fn resolve(&self, span: Span) -> ResolvedSpan {
+    fn resolve(&self, span: &Span) -> ResolvedSpan {
         // Count lines before the start/end
         let line_number_start = self.source[..=span.start].lines().count();
         let line_number_end = self.source[..=span.end].lines().count();
@@ -175,35 +182,5 @@ impl<'src> ReportFormatter<'src> {
             local_start: span.start - line_index_start,
             local_end: span.end - line_index_end,
         }
-    }
-}
-
-/// Iterator yielding every line in a string. The line includes newline character(s).
-pub struct LinesWithEndings<'a> {
-    input: &'a str,
-}
-
-impl<'a> LinesWithEndings<'a> {
-    pub fn from(input: &'a str) -> LinesWithEndings<'a> {
-        LinesWithEndings { input }
-    }
-}
-
-impl<'a> Iterator for LinesWithEndings<'a> {
-    type Item = &'a str;
-
-    #[inline]
-    fn next(&mut self) -> Option<&'a str> {
-        if self.input.is_empty() {
-            return None;
-        }
-        let split = self
-            .input
-            .find('\n')
-            .map(|i| i + 1)
-            .unwrap_or_else(|| self.input.len());
-        let (line, rest) = self.input.split_at(split);
-        self.input = rest;
-        Some(line)
     }
 }

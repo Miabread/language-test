@@ -57,9 +57,9 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
                 let mut last = char;
 
                 // Keep consuming digit chars
-                for char in &mut chars {
+                while let Some(char) = chars.peek() {
                     if char.1.is_ascii_digit() {
-                        last = char;
+                        last = chars.next().expect("due to peek above");
                     } else {
                         break;
                     }
@@ -112,13 +112,13 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
             }
 
             letter if letter.is_alphabetic() => {
-                // Last digit needed for slice
+                // Last char needed for slice
                 let mut last = char;
 
-                // Keep consuming digit chars
-                for char in &mut chars {
+                // Keep consuming chars
+                while let Some(char) = chars.peek() {
                     if char.1.is_alphanumeric() {
-                        last = char;
+                        last = chars.next().expect("due to peek above");
                     } else {
                         break;
                     }

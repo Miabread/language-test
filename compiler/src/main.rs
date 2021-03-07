@@ -13,7 +13,7 @@ struct Settings {
 
 #[derive(Debug, Clone, Clap)]
 enum SubCommand {
-    Run {
+    File {
         input: String,
     },
     Repl,
@@ -28,7 +28,7 @@ fn main() {
     let settings = Settings::parse();
 
     match settings.sub {
-        SubCommand::Run { input } => run_file(input),
+        SubCommand::File { input } => run_file(input),
         SubCommand::Repl => run_repl(),
         SubCommand::ErrorTest { input, start, end } => run_error_test(input, start, end),
     }

@@ -68,7 +68,7 @@ impl<'src> Reporter<'src> {
 
         // Label line
         self.blank_side(side_width);
-        self.repeat(" ", span.local_start);
+        self.repeat(" ", span.local_start + 1);
         // Columns are zero indexed, must +1 for correct alignment
         self.repeat("^".red().bold(), span.local_end - span.local_start + 1);
         self.message(&label.message);

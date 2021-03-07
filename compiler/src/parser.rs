@@ -16,16 +16,26 @@ pub fn parse<'src>(
             }
         }
 
-        if let Some(token) = source.next() {
-            if let TokenKind::Semicolon = token.kind {
-                continue;
-            } else {
-                errors.push(ParseError::ExpectedSemicolon { token });
-                continue;
-            }
+        // Take next token or finish if end of file
+        let token = if let Some(token) = source.next() {
+            token
         } else {
             break;
         };
+
+        // Expect semicolon
+        if let TokenKind::Semicolon = token.kind {
+        } else {
+            errors.push(ParseError::ExpectedSemicolon { token });
+
+            // Consume tokens until a semi colon is found
+            // This is done to avoid cascading errors
+            for token in &mut source {
+                if let TokenKind::Semicolon = token.kind {
+                    break;
+                }
+            }
+        }
     }
 
     if errors.is_empty() {

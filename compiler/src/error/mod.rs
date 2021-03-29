@@ -3,12 +3,19 @@ mod util;
 
 use colored::Colorize;
 pub use reporter::Reporter;
+use std::fmt::{Display, Formatter, Result as FmtResult};
 
 /// A Span in some source code.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Span {
     pub start: usize,
     pub end: usize,
+}
+
+impl Display for Span {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "{}..{}", self.start, self.end)
+    }
 }
 
 #[derive(Debug, Clone)]

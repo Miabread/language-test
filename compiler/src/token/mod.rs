@@ -1,26 +1,13 @@
+mod data;
+mod error;
+
+use std::str::FromStr;
+
 use crate::error::Span;
+pub use data::{Token, TokenKind};
+pub use error::ScanError;
 
-#[derive(Debug, Clone)]
-pub struct Token<'src> {
-    pub kind: TokenKind<'src>,
-    pub span: Span,
-}
-
-// Note: variant order should be the same as match order in scan()
-#[derive(Debug, Clone)]
-pub enum TokenKind<'src> {
-    OpenParen,
-    CloseParen,
-    OpenBrace,
-    CloseBrace,
-    Comma,
-    Semicolon,
-    Number(f64),
-    String(&'src str),
-    FuncKeyword,
-    DebugKeyword,
-    Identifier(&'src str),
-}
+use self::data::Keyword;
 
 pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     let mut chars = source.char_indices().peekable();
@@ -125,11 +112,10 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
                 }
 
                 // Check if reserved word
-                let kind = match &source[char.0..=last.0] {
-                    "func" => TokenKind::FuncKeyword,
-                    "debug" => TokenKind::DebugKeyword,
-                    ident => TokenKind::Identifier(ident),
-                };
+                let kind = &source[char.0..=last.0];
+                let kind = Keyword::from_str(kind)
+                    .map(TokenKind::Keyword)
+                    .unwrap_or_else(|()| TokenKind::Identifier(kind));
 
                 tokens.push(Token {
                     span: Span {
@@ -159,33 +145,4 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     }
 
     (tokens, errors)
-}
-
-#[derive(Debug, Clone)]
-pub enum ScanError {
-    UnterminatedString { start: usize },
-    InvalidCharacter { position: usize },
-}
-
-impl From<ScanError> for crate::error::Citation {
-    fn from(error: ScanError) -> Self {
-        use crate::error::Citation;
-        match error {
-            ScanError::UnterminatedString { start } => {
-                Citation::error("Unterminated string".to_owned()).span(
-                    Span { start, end: start },
-                    Some("string starts here".to_owned()),
-                )
-            }
-            ScanError::InvalidCharacter { position } => {
-                Citation::error("Invalid character".to_owned()).span(
-                    Span {
-                        start: position,
-                        end: position,
-                    },
-                    None,
-                )
-            }
-        }
-    }
 }

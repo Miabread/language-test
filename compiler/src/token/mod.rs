@@ -1,5 +1,7 @@
 mod data;
 mod error;
+#[cfg(test)]
+mod test;
 
 use std::str::FromStr;
 

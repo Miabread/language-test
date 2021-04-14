@@ -2,13 +2,13 @@ use crate::token::{Token, TokenKind};
 
 pub fn parse<'src>(
     mut source: impl Iterator<Item = Token<'src>>,
-) -> Result<Vec<f64>, Vec<ParseError<'src>>> {
+) -> Result<Vec<i64>, Vec<ParseError<'src>>> {
     let mut result = Vec::new();
     let mut errors = Vec::new();
 
     while let Some(token) = source.next() {
         match token.kind {
-            TokenKind::Number(number) => result.push(number),
+            TokenKind::Integer(number) => result.push(number),
             TokenKind::Semicolon => continue,
             _ => {
                 errors.push(ParseError::Unimplemented { token });

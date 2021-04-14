@@ -57,7 +57,7 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
                 // TODO: Implement float literals. Delayed due to needing double look ahead.
 
                 // Parse the digits into a number
-                let kind = TokenKind::Number(
+                let kind = TokenKind::Integer(
                     source[char.0..=last.0]
                         .parse()
                         .expect("parse to work since we only pass digits"),

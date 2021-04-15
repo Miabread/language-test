@@ -4,6 +4,8 @@ use crate::error::Span;
 pub enum ScanError {
     UnterminatedString { start: usize },
     InvalidCharacter { position: usize },
+    // TODO: Rust doesn't allow you to inspect the cause yet
+    InvalidInteger { span: Span },
 }
 
 impl From<ScanError> for crate::error::Citation {
@@ -24,6 +26,9 @@ impl From<ScanError> for crate::error::Citation {
                     },
                     None,
                 )
+            }
+            ScanError::InvalidInteger { span } => {
+                Citation::error("Invalid integer".to_owned()).span(span, None)
             }
         }
     }

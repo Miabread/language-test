@@ -77,20 +77,19 @@ impl<'src> Scanner<'src> {
 
                 // TODO: Implement float literals. Delayed due to needing double look ahead.
 
+                let span = Span {
+                    start: head.0,
+                    end: last.0,
+                };
+
                 // Parse the digits into a number
-                let kind = TokenKind::Integer(
+                return Some(
                     self.source[head.0..=last.0]
                         .parse()
-                        .expect("parse to work since we only pass digits"),
+                        .map(TokenKind::Integer)
+                        .map(|kind| Token { span, kind })
+                        .map_err(|_| ScanError::InvalidInteger { span }),
                 );
-
-                return Some(Ok(Token {
-                    span: Span {
-                        start: head.0,
-                        end: last.0,
-                    },
-                    kind,
-                }));
             }
 
             // Parse string literals

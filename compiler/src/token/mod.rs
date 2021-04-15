@@ -15,7 +15,7 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     let mut tokens = Vec::new();
     let mut errors = Vec::new();
 
-    'outer: while let Some(char) = chars.next() {
+    while let Some(char) = chars.next() {
         let kind = match char.1 {
             // Ignore whitespace in between token boundaries
             char if char.is_whitespace() => continue,
@@ -65,15 +65,14 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
             // Parse string literals
             '"' => {
                 // Keep consuming chars until a quote
-                let closing = loop {
-                    match chars.next() {
-                        Some(closing @ (_, '"')) => break closing,
-                        None => {
-                            errors.push(ScanError::UnterminatedString { start: char.0 });
-                            break 'outer;
-                        }
-                        _ => {}
-                    }
+                chars.peeking_take_while(|it| it.1 != '"').for_each(drop);
+
+                // Expect a closing quote
+                let closing = if let Some(closing) = chars.next_if(|it| it.1 == '"') {
+                    closing
+                } else {
+                    errors.push(ScanError::UnterminatedString { start: char.0 });
+                    break;
                 };
 
                 // Slice the leading and trailing quote

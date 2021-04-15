@@ -6,10 +6,9 @@ mod test;
 use std::str::FromStr;
 
 use crate::error::Span;
-pub use data::{Token, TokenKind};
+pub use data::{Keyword, Token, TokenKind};
 pub use error::ScanError;
-
-use self::data::Keyword;
+use itertools::Itertools;
 
 pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     let mut chars = source.char_indices().peekable();
@@ -30,13 +29,9 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
             ';' => TokenKind::Semicolon,
 
             // Check for "//" comment starter
-            '/' if chars.peek().map(|c| c.1 == '/').unwrap_or(false) => {
+            '/' if chars.next_if(|it| it.1 == '/').is_some() => {
                 // Keep consuming chars until a new line
-                while let Some(char) = chars.next() {
-                    if char.1 == '\n' {
-                        break;
-                    }
-                }
+                chars.peeking_take_while(|it| it.1 != '\n').for_each(drop);
                 continue;
             }
 

@@ -37,17 +37,11 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
 
             // Parse number literals
             number if number.is_ascii_digit() => {
-                // Last digit needed for slice
-                let mut last = char;
-
-                // Keep consuming digit chars
-                while let Some(char) = chars.peek() {
-                    if char.1.is_ascii_digit() {
-                        last = chars.next().expect("due to peek above");
-                    } else {
-                        break;
-                    }
-                }
+                // Keep consuming digit chars, last digit needed for slice
+                let last = chars
+                    .peeking_take_while(|it| it.1.is_ascii_digit())
+                    .last()
+                    .unwrap_or(char);
 
                 // TODO: Implement float literals. Delayed due to needing double look ahead.
 

@@ -1,11 +1,10 @@
+use crate::error::Span;
 use std::{
-    fmt::{Display, Formatter, Result as FmtResult},
+    fmt::{Debug, Display, Formatter, Result as FmtResult},
     str::FromStr,
 };
 
-use crate::error::Span;
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Token<'src> {
     pub kind: TokenKind<'src>,
     pub span: Span,
@@ -14,6 +13,12 @@ pub struct Token<'src> {
 impl Display for Token<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(f, "{} [{}]", self.kind, self.span)
+    }
+}
+
+impl Debug for Token<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "token({:?}, {})", self.kind, self.span)
     }
 }
 

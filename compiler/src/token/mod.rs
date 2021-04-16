@@ -10,12 +10,31 @@ use itertools::{Itertools, MultiPeek, PeekingNext};
 use std::str::{CharIndices, FromStr};
 
 pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
-    Scanner::new(source).scan()
+    let mut tokens = Vec::new();
+    let mut errors = Vec::new();
+
+    for eee in Scanner::new(source) {
+        match eee {
+            Ok(token) => tokens.push(token),
+            Err(error) => errors.push(error),
+        }
+    }
+
+    (tokens, errors)
 }
 
 struct Scanner<'src> {
     source: &'src str,
     chars: MultiPeek<CharIndices<'src>>,
+}
+
+impl<'src> Iterator for Scanner<'src> {
+    type Item = Result<Token<'src>, ScanError>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.trim();
+        self.next_token()
+    }
 }
 
 impl<'src> Scanner<'src> {
@@ -26,22 +45,7 @@ impl<'src> Scanner<'src> {
         }
     }
 
-    fn scan(&mut self) -> (Vec<Token<'src>>, Vec<ScanError>) {
-        let mut tokens = Vec::new();
-        let mut errors = Vec::new();
-
-        while let Some(eee) = self.next() {
-            match eee {
-                Ok(token) => tokens.push(token),
-                Err(error) => errors.push(error),
-            }
-        }
-
-        (tokens, errors)
-    }
-
-    fn next(&mut self) -> Option<Result<Token<'src>, ScanError>> {
-        self.trim();
+    fn next_token(&mut self) -> Option<Result<Token<'src>, ScanError>> {
         let head = self.chars.next()?;
 
         Some(match head.1 {

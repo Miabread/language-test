@@ -9,6 +9,9 @@ pub use error::ScanError;
 use itertools::{Itertools, MultiPeek, PeekingNext};
 use std::str::{CharIndices, FromStr};
 
+type ScanResult<'src> = Result<Token<'src>, ScanError>;
+type Head = (usize, char);
+
 pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     let mut tokens = Vec::new();
     let mut errors = Vec::new();
@@ -29,11 +32,16 @@ struct Scanner<'src> {
 }
 
 impl<'src> Iterator for Scanner<'src> {
-    type Item = Result<Token<'src>, ScanError>;
+    type Item = ScanResult<'src>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.trim();
-        self.next_token()
+        let head = self.chars.next()?;
+
+        self.simple_tokens(head)
+            .or_else(|| self.number_literals(head))
+            .or_else(|| self.next_token(head))
+            .or(Some(Err(ScanError::InvalidCharacter { position: head.0 })))
     }
 }
 
@@ -45,42 +53,51 @@ impl<'src> Scanner<'src> {
         }
     }
 
-    fn next_token(&mut self) -> Option<Result<Token<'src>, ScanError>> {
-        let head = self.chars.next()?;
+    fn simple_tokens(&mut self, head: Head) -> Option<ScanResult<'src>> {
+        let kind = match head.1 {
+            '(' => TokenKind::OpenParen,
+            ')' => TokenKind::CloseParen,
+            '{' => TokenKind::OpenBrace,
+            '}' => TokenKind::CloseBrace,
+            ',' => TokenKind::Comma,
+            ';' => TokenKind::Semicolon,
+            _ => return None,
+        };
 
+        Some(Ok(Token::new(kind, Span::new(head.0, head.0))))
+    }
+
+    fn number_literals(&mut self, head: Head) -> Option<ScanResult<'src>> {
+        if !head.1.is_ascii_digit() {
+            return None;
+        }
+
+        // Keep consuming digit chars, last digit needed for slice
+        let last = self
+            .chars
+            .peeking_take_while(|it| it.1.is_ascii_digit())
+            .last()
+            .unwrap_or(head);
+
+        // TODO: Implement float literals. Delayed due to needing double look ahead.
+
+        let span = Span {
+            start: head.0,
+            end: last.0,
+        };
+
+        // Parse the digits into a number
+        Some(
+            self.source[head.0..=last.0]
+                .parse()
+                .map(TokenKind::Integer)
+                .map(|kind| Token { span, kind })
+                .map_err(|_| ScanError::InvalidInteger { span }),
+        )
+    }
+
+    fn next_token(&mut self, head: Head) -> Option<ScanResult<'src>> {
         Some(match head.1 {
-            // Single char tokens get handled outside the match
-            '(' => Ok(Token::new(TokenKind::OpenParen, Span::new(head.0, head.0))),
-            ')' => Ok(Token::new(TokenKind::CloseParen, Span::new(head.0, head.0))),
-            '{' => Ok(Token::new(TokenKind::OpenBrace, Span::new(head.0, head.0))),
-            '}' => Ok(Token::new(TokenKind::CloseBrace, Span::new(head.0, head.0))),
-            ',' => Ok(Token::new(TokenKind::Comma, Span::new(head.0, head.0))),
-            ';' => Ok(Token::new(TokenKind::Semicolon, Span::new(head.0, head.0))),
-
-            // Parse number literals
-            number if number.is_ascii_digit() => {
-                // Keep consuming digit chars, last digit needed for slice
-                let last = self
-                    .chars
-                    .peeking_take_while(|it| it.1.is_ascii_digit())
-                    .last()
-                    .unwrap_or(head);
-
-                // TODO: Implement float literals. Delayed due to needing double look ahead.
-
-                let span = Span {
-                    start: head.0,
-                    end: last.0,
-                };
-
-                // Parse the digits into a number
-                self.source[head.0..=last.0]
-                    .parse()
-                    .map(TokenKind::Integer)
-                    .map(|kind| Token { span, kind })
-                    .map_err(|_| ScanError::InvalidInteger { span })
-            }
-
             // Parse string literals
             '"' => {
                 // Keep consuming chars until a quote
@@ -119,7 +136,7 @@ impl<'src> Scanner<'src> {
             }
 
             // Handle unknown char
-            _ => Err(ScanError::InvalidCharacter { position: head.0 }),
+            _ => return None,
         })
     }
 
@@ -142,11 +159,11 @@ impl<'src> Scanner<'src> {
         }
     }
 
-    fn peek_if_char(&mut self, char: char) -> Option<&(usize, char)> {
+    fn peek_if_char(&mut self, char: char) -> Option<&Head> {
         self.chars.peek().filter(|it| it.1 == char)
     }
 
-    fn next_if_char(&mut self, char: char) -> Option<(usize, char)> {
+    fn next_if_char(&mut self, char: char) -> Option<Head> {
         self.chars.peeking_next(|it| it.1 == char)
     }
 }

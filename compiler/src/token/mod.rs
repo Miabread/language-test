@@ -33,22 +33,20 @@ impl<'src> Scanner<'src> {
         let mut tokens = Vec::new();
         let mut errors = Vec::new();
 
-        while let Some(head) = self.chars.next() {
-            match self.next(head) {
-                Some(Ok(token)) => tokens.push(token),
-                Some(Err(error)) => errors.push(error),
-                None => {}
+        while let Some(eee) = self.next() {
+            match eee {
+                Ok(token) => tokens.push(token),
+                Err(error) => errors.push(error),
             }
         }
 
         (tokens, errors)
     }
 
-    fn next(&mut self, head: (usize, char)) -> Option<Result<Token<'src>, ScanError>> {
-        let kind = match head.1 {
-            // Ignore whitespace in between token boundaries
-            char if char.is_whitespace() => return None,
+    fn next(&mut self) -> Option<Result<Token<'src>, ScanError>> {
+        let head = self.trim()?;
 
+        let kind = match head.1 {
             // Single char tokens get handled outside the match
             '(' => TokenKind::OpenParen,
             ')' => TokenKind::CloseParen,
@@ -56,15 +54,6 @@ impl<'src> Scanner<'src> {
             '}' => TokenKind::CloseBrace,
             ',' => TokenKind::Comma,
             ';' => TokenKind::Semicolon,
-
-            // Check for "//" comment starter
-            '/' if self.chars.next_if(|it| it.1 == '/').is_some() => {
-                // Keep consuming chars until a new line
-                self.chars
-                    .peeking_take_while(|it| it.1 != '\n')
-                    .for_each(drop);
-                return None;
-            }
 
             // Parse number literals
             number if number.is_ascii_digit() => {
@@ -155,5 +144,33 @@ impl<'src> Scanner<'src> {
             },
             kind,
         }))
+    }
+
+    /// Ignore whitespace and comments in between token boundaries
+    fn trim(&mut self) -> Option<(usize, char)> {
+        loop {
+            // Trim any whitespace
+            self.chars
+                .peeking_take_while(|it| it.1.is_whitespace())
+                .for_each(drop);
+
+            // Get the head because we only have single peek
+            // The ? also handles end of file
+            let head = self.chars.next()?;
+
+            // Check for "//" comment starter
+            if head.1 == '/' && self.chars.next_if(|it| it.1 == '/').is_some() {
+                // Keep consuming chars until a new line
+                self.chars
+                    .peeking_take_while(|it| it.1 != '\n')
+                    .for_each(drop);
+
+                // Try again for potentially more whitespace or comments
+                continue;
+            }
+
+            // No whitespace, comments, or EOF, assume a valid token is next
+            return Some(head);
+        }
     }
 }

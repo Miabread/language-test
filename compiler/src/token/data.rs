@@ -13,7 +13,7 @@ pub struct Token<'src> {
 
 impl Display for Token<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        write!(f, "[{} @{}]", self.kind, self.span)
+        write!(f, "{} [{}]", self.kind, self.span)
     }
 }
 

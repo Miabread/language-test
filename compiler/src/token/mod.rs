@@ -40,7 +40,8 @@ impl<'src> Iterator for Scanner<'src> {
 
         self.simple_tokens(head)
             .or_else(|| self.number_literals(head))
-            .or_else(|| self.next_token(head))
+            .or_else(|| self.string_literal(head))
+            .or_else(|| self.identifier_or_keyword(head))
             .or(Some(Err(ScanError::InvalidCharacter { position: head.0 })))
     }
 }
@@ -96,48 +97,48 @@ impl<'src> Scanner<'src> {
         )
     }
 
-    fn next_token(&mut self, head: Head) -> Option<ScanResult<'src>> {
-        Some(match head.1 {
-            // Parse string literals
-            '"' => {
-                // Keep consuming chars until a quote
-                self.chars
-                    .peeking_take_while(|it| it.1 != '"')
-                    .for_each(drop);
+    fn string_literal(&mut self, head: Head) -> Option<ScanResult<'src>> {
+        if head.1 != '"' {
+            return None;
+        }
 
-                // Expect a closing quote
-                let closing = if let Some(closing) = self.next_if_char('"') {
-                    closing
-                } else {
-                    return Some(Err(ScanError::UnterminatedString { start: head.0 }));
-                };
+        // Keep consuming chars until a quote
+        self.chars
+            .peeking_take_while(|it| it.1 != '"')
+            .for_each(drop);
 
-                // Slice the leading and trailing quote
-                let kind = TokenKind::String(&self.source[head.0 + 1..closing.0]);
+        // Expect a closing quote
+        let closing = if let Some(closing) = self.next_if_char('"') {
+            closing
+        } else {
+            return Some(Err(ScanError::UnterminatedString { start: head.0 }));
+        };
 
-                Ok(Token::new(kind, Span::new(head.0, closing.0)))
-            }
+        // Slice the leading and trailing quote
+        let kind = TokenKind::String(&self.source[head.0 + 1..closing.0]);
 
-            letter if letter.is_alphabetic() => {
-                // Keep consuming chars, last char needed for slice
-                let last = self
-                    .chars
-                    .peeking_take_while(|it| it.1.is_alphanumeric())
-                    .last()
-                    .unwrap_or(head);
+        Some(Ok(Token::new(kind, Span::new(head.0, closing.0))))
+    }
 
-                // Check if reserved word
-                let kind = &self.source[head.0..=last.0];
-                let kind = Keyword::from_str(kind)
-                    .map(TokenKind::Keyword)
-                    .unwrap_or_else(|()| TokenKind::Identifier(kind));
+    fn identifier_or_keyword(&mut self, head: Head) -> Option<ScanResult<'src>> {
+        if !head.1.is_alphabetic() {
+            return None;
+        }
 
-                Ok(Token::new(kind, Span::new(head.0, last.0)))
-            }
+        // Keep consuming chars, last char needed for slice
+        let last = self
+            .chars
+            .peeking_take_while(|it| it.1.is_alphanumeric())
+            .last()
+            .unwrap_or(head);
 
-            // Handle unknown char
-            _ => return None,
-        })
+        // Check if reserved word
+        let kind = &self.source[head.0..=last.0];
+        let kind = Keyword::from_str(kind)
+            .map(TokenKind::Keyword)
+            .unwrap_or_else(|()| TokenKind::Identifier(kind));
+
+        Some(Ok(Token::new(kind, Span::new(head.0, last.0))))
     }
 
     /// Ignore whitespace and comments in between token boundaries

@@ -35,8 +35,12 @@ pub enum TokenKind<'src> {
     CloseParen,
     OpenBrace,
     CloseBrace,
+    OpenAngle,
+    CloseAngle,
     Comma,
     Semicolon,
+    DotSymbol,
+    AtSymbol,
     Integer(i64),
     String(&'src str),
     Keyword(Keyword),
@@ -49,16 +53,20 @@ impl Display for TokenKind<'_> {
             f,
             "{}",
             match self {
-                TokenKind::OpenParen => "(",
-                TokenKind::CloseParen => ")",
-                TokenKind::OpenBrace => "{",
-                TokenKind::CloseBrace => "}",
-                TokenKind::Comma => ",",
-                TokenKind::Semicolon => ";",
-                TokenKind::Integer(it) => return write!(f, "{}", it),
-                TokenKind::String(it) => return write!(f, r#""{}""#, it),
-                TokenKind::Keyword(it) => return write!(f, "{}", it),
-                TokenKind::Identifier(it) => return write!(f, "{}", it),
+                Self::OpenParen => "(",
+                Self::CloseParen => ")",
+                Self::OpenBrace => "{",
+                Self::CloseBrace => "}",
+                Self::OpenAngle => "<",
+                Self::CloseAngle => ">",
+                Self::Comma => ",",
+                Self::Semicolon => ";",
+                Self::DotSymbol => ".",
+                Self::AtSymbol => "@",
+                Self::Integer(it) => return write!(f, "{}", it),
+                Self::String(it) => return write!(f, r#""{}""#, it),
+                Self::Keyword(it) => return write!(f, "{}", it),
+                Self::Identifier(it) => return write!(f, "{}", it),
             }
         )
     }
@@ -66,8 +74,7 @@ impl Display for TokenKind<'_> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Keyword {
-    Func,
-    Debug,
+    Struct,
 }
 
 impl Display for Keyword {
@@ -76,8 +83,7 @@ impl Display for Keyword {
             f,
             "{}",
             match self {
-                Keyword::Func => "func",
-                Keyword::Debug => "debug",
+                Self::Struct => "struct",
             }
         )
     }
@@ -88,8 +94,7 @@ impl FromStr for Keyword {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "func" => Keyword::Func,
-            "debug" => Keyword::Debug,
+            "struct" => Self::Struct,
             _ => return Err(()),
         })
     }

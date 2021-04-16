@@ -12,18 +12,8 @@ use std::str::{CharIndices, FromStr};
 type ScanResult<'src> = Result<Token<'src>, ScanError>;
 type Head = (usize, char);
 
-pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
-    let mut tokens = Vec::new();
-    let mut errors = Vec::new();
-
-    for eee in Scanner::new(source) {
-        match eee {
-            Ok(token) => tokens.push(token),
-            Err(error) => errors.push(error),
-        }
-    }
-
-    (tokens, errors)
+pub fn scan(source: &str) -> impl Iterator<Item = ScanResult<'_>> {
+    Scanner::new(source)
 }
 
 struct Scanner<'src> {
@@ -108,7 +98,7 @@ impl<'src> Scanner<'src> {
             .for_each(drop);
 
         // Expect a closing quote
-        let closing = if let Some(closing) = self.next_if_char('"') {
+        let closing = if let Some(closing) = self.chars.peeking_next(|it| it.1 == '"') {
             closing
         } else {
             return Some(Err(ScanError::UnterminatedString { start: head.0 }));
@@ -151,20 +141,14 @@ impl<'src> Scanner<'src> {
                 .for_each(drop);
 
             // Check for "//" comment starter
-            self.peek_if_char('/').is_some() && self.next_if_char('/').is_some()
+            // We have to some weird peeking to ensure a single "/" won't be consumed
+            self.chars.peek().filter(|it| it.1 == '/').is_some()
+                && self.chars.peeking_next(|it| it.1 == '/').is_some()
         } {
             // Keep consuming chars until a new line
             self.chars
                 .peeking_take_while(|it| it.1 != '\n')
                 .for_each(drop);
         }
-    }
-
-    fn peek_if_char(&mut self, char: char) -> Option<&Head> {
-        self.chars.peek().filter(|it| it.1 == char)
-    }
-
-    fn next_if_char(&mut self, char: char) -> Option<Head> {
-        self.chars.peeking_next(|it| it.1 == char)
     }
 }

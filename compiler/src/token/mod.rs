@@ -6,8 +6,11 @@ mod test;
 use crate::error::Span;
 pub use data::{Keyword, Token, TokenKind};
 pub use error::ScanError;
-use itertools::{Itertools, MultiPeek, PeekingNext};
-use std::str::{CharIndices, FromStr};
+use itertools::Itertools;
+use std::{
+    iter::Peekable,
+    str::{CharIndices, FromStr},
+};
 
 type ScanResult<'src> = Result<Token<'src>, ScanError>;
 type Head = (usize, char);
@@ -18,7 +21,7 @@ pub fn scan(source: &str) -> impl Iterator<Item = ScanResult<'_>> {
 
 struct Scanner<'src> {
     source: &'src str,
-    chars: MultiPeek<CharIndices<'src>>,
+    chars: Peekable<CharIndices<'src>>,
 }
 
 impl<'src> Iterator for Scanner<'src> {
@@ -40,7 +43,34 @@ impl<'src> Scanner<'src> {
     fn new(source: &'src str) -> Self {
         Self {
             source,
-            chars: source.char_indices().multipeek(),
+            chars: source.char_indices().peekable(),
+        }
+    }
+
+    /// Ignore whitespace and comments in between token boundaries
+    fn trim(&mut self) -> Option<Head> {
+        // Note the condition is in the middle of the loop
+        loop {
+            // Trim any whitespace
+            self.chars
+                .peeking_take_while(|it| it.1.is_whitespace())
+                .for_each(drop);
+
+            let head = self.chars.next()?;
+
+            // Check for "//" comment starter
+            if head.1 == '/' && self.chars.next_if(|it| it.1 == '/').is_some() {
+                // Keep consuming chars until a new line
+                self.chars
+                    .peeking_take_while(|it| it.1 != '\n')
+                    .for_each(drop);
+
+                // Loop again for potentially more whitespace or comments
+                continue;
+            }
+
+            // No whitespace, comments, or EOF, assume a valid token is next
+            return Some(head);
         }
     }
 
@@ -50,8 +80,12 @@ impl<'src> Scanner<'src> {
             ')' => TokenKind::CloseParen,
             '{' => TokenKind::OpenBrace,
             '}' => TokenKind::CloseBrace,
+            '<' => TokenKind::OpenAngle,
+            '>' => TokenKind::CloseAngle,
             ',' => TokenKind::Comma,
             ';' => TokenKind::Semicolon,
+            '.' => TokenKind::DotSymbol,
+            '@' => TokenKind::AtSymbol,
             _ => return None,
         };
 
@@ -98,7 +132,7 @@ impl<'src> Scanner<'src> {
             .for_each(drop);
 
         // Expect a closing quote
-        let closing = if let Some(closing) = self.chars.peeking_next(|it| it.1 == '"') {
+        let closing = if let Some(closing) = self.chars.next_if(|it| it.1 == '"') {
             closing
         } else {
             return Some(Err(ScanError::UnterminatedString { start: head.0 }));
@@ -129,26 +163,5 @@ impl<'src> Scanner<'src> {
             .unwrap_or_else(|()| TokenKind::Identifier(kind));
 
         Some(Ok(Token::new(kind, Span::new(head.0, last.0))))
-    }
-
-    /// Ignore whitespace and comments in between token boundaries
-    fn trim(&mut self) {
-        // Note the condition is in the middle of the loop
-        while {
-            // Trim any whitespace
-            self.chars
-                .peeking_take_while(|it| it.1.is_whitespace())
-                .for_each(drop);
-
-            // Check for "//" comment starter
-            // We have to some weird peeking to ensure a single "/" won't be consumed
-            self.chars.peek().filter(|it| it.1 == '/').is_some()
-                && self.chars.peeking_next(|it| it.1 == '/').is_some()
-        } {
-            // Keep consuming chars until a new line
-            self.chars
-                .peeking_take_while(|it| it.1 != '\n')
-                .for_each(drop);
-        }
     }
 }

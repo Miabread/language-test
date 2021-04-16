@@ -10,6 +10,12 @@ pub struct Token<'src> {
     pub span: Span,
 }
 
+impl<'src> Token<'src> {
+    pub fn new(kind: TokenKind<'src>, span: Span) -> Self {
+        Self { kind, span }
+    }
+}
+
 impl Display for Token<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         write!(f, "{} [{}]", self.kind, self.span)

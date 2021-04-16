@@ -44,14 +44,14 @@ impl<'src> Scanner<'src> {
         self.trim();
         let head = self.chars.next()?;
 
-        let kind = match head.1 {
+        Some(match head.1 {
             // Single char tokens get handled outside the match
-            '(' => TokenKind::OpenParen,
-            ')' => TokenKind::CloseParen,
-            '{' => TokenKind::OpenBrace,
-            '}' => TokenKind::CloseBrace,
-            ',' => TokenKind::Comma,
-            ';' => TokenKind::Semicolon,
+            '(' => Ok(Token::new(TokenKind::OpenParen, Span::new(head.0, head.0))),
+            ')' => Ok(Token::new(TokenKind::CloseParen, Span::new(head.0, head.0))),
+            '{' => Ok(Token::new(TokenKind::OpenBrace, Span::new(head.0, head.0))),
+            '}' => Ok(Token::new(TokenKind::CloseBrace, Span::new(head.0, head.0))),
+            ',' => Ok(Token::new(TokenKind::Comma, Span::new(head.0, head.0))),
+            ';' => Ok(Token::new(TokenKind::Semicolon, Span::new(head.0, head.0))),
 
             // Parse number literals
             number if number.is_ascii_digit() => {
@@ -70,13 +70,11 @@ impl<'src> Scanner<'src> {
                 };
 
                 // Parse the digits into a number
-                return Some(
-                    self.source[head.0..=last.0]
-                        .parse()
-                        .map(TokenKind::Integer)
-                        .map(|kind| Token { span, kind })
-                        .map_err(|_| ScanError::InvalidInteger { span }),
-                );
+                self.source[head.0..=last.0]
+                    .parse()
+                    .map(TokenKind::Integer)
+                    .map(|kind| Token { span, kind })
+                    .map_err(|_| ScanError::InvalidInteger { span })
             }
 
             // Parse string literals
@@ -96,13 +94,7 @@ impl<'src> Scanner<'src> {
                 // Slice the leading and trailing quote
                 let kind = TokenKind::String(&self.source[head.0 + 1..closing.0]);
 
-                return Some(Ok(Token {
-                    span: Span {
-                        start: head.0,
-                        end: closing.0,
-                    },
-                    kind,
-                }));
+                Ok(Token::new(kind, Span::new(head.0, closing.0)))
             }
 
             letter if letter.is_alphabetic() => {
@@ -119,29 +111,12 @@ impl<'src> Scanner<'src> {
                     .map(TokenKind::Keyword)
                     .unwrap_or_else(|()| TokenKind::Identifier(kind));
 
-                return Some(Ok(Token {
-                    span: Span {
-                        start: head.0,
-                        end: last.0,
-                    },
-                    kind,
-                }));
+                Ok(Token::new(kind, Span::new(head.0, last.0)))
             }
 
             // Handle unknown char
-            _ => {
-                return Some(Err(ScanError::InvalidCharacter { position: head.0 }));
-            }
-        };
-
-        // All single char tokens are handled down here
-        Some(Ok(Token {
-            span: Span {
-                start: head.0,
-                end: head.0,
-            },
-            kind,
-        }))
+            _ => Err(ScanError::InvalidCharacter { position: head.0 }),
+        })
     }
 
     /// Ignore whitespace and comments in between token boundaries

@@ -6,11 +6,8 @@ mod test;
 use crate::error::Span;
 pub use data::{Keyword, Token, TokenKind};
 pub use error::ScanError;
-use itertools::Itertools;
-use std::{
-    iter::Peekable,
-    str::{CharIndices, FromStr},
-};
+use itertools::{Itertools, MultiPeek, PeekingNext};
+use std::str::{CharIndices, FromStr};
 
 pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
     Scanner::new(source).scan()
@@ -18,14 +15,14 @@ pub fn scan(source: &str) -> (Vec<Token<'_>>, Vec<ScanError>) {
 
 struct Scanner<'src> {
     source: &'src str,
-    chars: Peekable<CharIndices<'src>>,
+    chars: MultiPeek<CharIndices<'src>>,
 }
 
 impl<'src> Scanner<'src> {
     fn new(source: &'src str) -> Self {
         Self {
             source,
-            chars: source.char_indices().peekable(),
+            chars: source.char_indices().multipeek(),
         }
     }
 
@@ -44,7 +41,8 @@ impl<'src> Scanner<'src> {
     }
 
     fn next(&mut self) -> Option<Result<Token<'src>, ScanError>> {
-        let head = self.trim()?;
+        self.trim();
+        let head = self.chars.next()?;
 
         let kind = match head.1 {
             // Single char tokens get handled outside the match
@@ -89,7 +87,7 @@ impl<'src> Scanner<'src> {
                     .for_each(drop);
 
                 // Expect a closing quote
-                let closing = if let Some(closing) = self.chars.next_if(|it| it.1 == '"') {
+                let closing = if let Some(closing) = self.next_if_char('"') {
                     closing
                 } else {
                     return Some(Err(ScanError::UnterminatedString { start: head.0 }));
@@ -147,30 +145,29 @@ impl<'src> Scanner<'src> {
     }
 
     /// Ignore whitespace and comments in between token boundaries
-    fn trim(&mut self) -> Option<(usize, char)> {
-        loop {
+    fn trim(&mut self) {
+        // Note the condition is in the middle of the loop
+        while {
             // Trim any whitespace
             self.chars
                 .peeking_take_while(|it| it.1.is_whitespace())
                 .for_each(drop);
 
-            // Get the head because we only have single peek
-            // The ? also handles end of file
-            let head = self.chars.next()?;
-
             // Check for "//" comment starter
-            if head.1 == '/' && self.chars.next_if(|it| it.1 == '/').is_some() {
-                // Keep consuming chars until a new line
-                self.chars
-                    .peeking_take_while(|it| it.1 != '\n')
-                    .for_each(drop);
-
-                // Try again for potentially more whitespace or comments
-                continue;
-            }
-
-            // No whitespace, comments, or EOF, assume a valid token is next
-            return Some(head);
+            self.peek_if_char('/').is_some() && self.next_if_char('/').is_some()
+        } {
+            // Keep consuming chars until a new line
+            self.chars
+                .peeking_take_while(|it| it.1 != '\n')
+                .for_each(drop);
         }
+    }
+
+    fn peek_if_char(&mut self, char: char) -> Option<&(usize, char)> {
+        self.chars.peek().filter(|it| it.1 == char)
+    }
+
+    fn next_if_char(&mut self, char: char) -> Option<(usize, char)> {
+        self.chars.peeking_next(|it| it.1 == char)
     }
 }

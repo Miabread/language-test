@@ -79,3 +79,11 @@ bbb ccc   // foo bar
         )
     )
 }
+
+#[test]
+fn comments_and_slash() {
+    assert_eq!(
+        scan(r"/    // wew"),
+        (vec![], vec![InvalidCharacter { position: 0 }])
+    );
+}

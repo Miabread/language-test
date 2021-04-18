@@ -82,3 +82,23 @@ fn comments_and_slash() {
         vec![Err(InvalidToken { position: 0 })]
     );
 }
+
+#[test]
+fn character_literals() {
+    assert_eq!(
+        scan(r#"'w' '' 'wew  '"' '"#).collect_vec(),
+        vec![
+            token(Character('w'), 0..2),
+            Err(EmptyCharacter {
+                span: Span { start: 4, end: 5 }
+            }),
+            Err(CharacterExpectedClosing {
+                actual: 'e',
+                span: Span { start: 7, end: 9 }
+            }),
+            token(Identifier("w"), 10..10),
+            token(Character('\"'), 13..15),
+            Err(UnterminatedCharacterEof { start: 17 })
+        ]
+    );
+}

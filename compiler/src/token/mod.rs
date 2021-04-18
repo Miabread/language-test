@@ -28,14 +28,14 @@ impl<'src> Iterator for Scanner<'src> {
     type Item = ScanResult<'src>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.trim();
-        let head = self.chars.next()?;
+        let head = self.trim()?;
 
         self.simple_tokens(head)
             .or_else(|| self.number_literals(head))
+            .or_else(|| self.character_literal(head))
             .or_else(|| self.string_literal(head))
             .or_else(|| self.identifier_or_keyword(head))
-            .or(Some(Err(ScanError::InvalidCharacter { position: head.0 })))
+            .or(Some(Err(ScanError::InvalidToken { position: head.0 })))
     }
 }
 
@@ -119,6 +119,48 @@ impl<'src> Scanner<'src> {
                 .map(|kind| Token { span, kind })
                 .map_err(|_| ScanError::InvalidInteger { span }),
         )
+    }
+
+    fn character_literal(&mut self, head: Head) -> Option<ScanResult<'src>> {
+        const QUOTE: char = '\'';
+
+        if head.1 != QUOTE {
+            return None;
+        }
+
+        // Expect a character...
+        let char = if let Some(char) = self.chars.next() {
+            char
+        } else {
+            return Some(Err(ScanError::UnterminatedCharacterEof { start: head.0 }));
+        };
+
+        // ...that is not a quote
+        if char.1 == QUOTE {
+            return Some(Err(ScanError::EmptyCharacter {
+                span: Span::new(head.0, char.0),
+            }));
+        }
+
+        // Expect a character...
+        let closing = if let Some(closing) = self.chars.next() {
+            closing
+        } else {
+            return Some(Err(ScanError::UnterminatedCharacterEof { start: head.0 }));
+        };
+
+        // ...that is a quote
+        if closing.1 != QUOTE {
+            return Some(Err(ScanError::CharacterExpectedClosing {
+                actual: closing.1,
+                span: Span::new(head.0, closing.0),
+            }));
+        }
+
+        Some(Ok(Token::new(
+            TokenKind::Character(char.1),
+            Span::new(head.0, closing.0),
+        )))
     }
 
     fn string_literal(&mut self, head: Head) -> Option<ScanResult<'src>> {

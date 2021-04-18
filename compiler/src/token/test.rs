@@ -79,6 +79,6 @@ bbb ccc   // foo bar
 fn comments_and_slash() {
     assert_eq!(
         scan(r"/    // wew").collect_vec(),
-        vec![Err(InvalidCharacter { position: 0 })]
+        vec![Err(InvalidToken { position: 0 })]
     );
 }

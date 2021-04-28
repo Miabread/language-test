@@ -128,34 +128,30 @@ impl<'src> Scanner<'src> {
             return None;
         }
 
-        // Expect a character...
-        let char = if let Some(char) = self.chars.next() {
-            char
-        } else {
-            return Some(Err(ScanError::UnterminatedCharacterEof { start: head.0 }));
+        let char = match self.chars.next() {
+            // Expect a character...
+            None => return Some(Err(ScanError::UnterminatedCharacterEof { start: head.0 })),
+            // ...that is not a quote
+            Some(char) if char.1 == QUOTE => {
+                return Some(Err(ScanError::EmptyCharacter {
+                    span: Span::new(head.0, char.0),
+                }))
+            }
+            Some(char) => char,
         };
 
-        // ...that is not a quote
-        if char.1 == QUOTE {
-            return Some(Err(ScanError::EmptyCharacter {
-                span: Span::new(head.0, char.0),
-            }));
-        }
-
-        // Expect a character...
-        let closing = if let Some(closing) = self.chars.next() {
-            closing
-        } else {
-            return Some(Err(ScanError::UnterminatedCharacterEof { start: head.0 }));
+        let closing = match self.chars.next() {
+            // Expect a character...
+            None => return Some(Err(ScanError::UnterminatedCharacterEof { start: head.0 })),
+            // ...that is  a quote
+            Some(closing) if closing.1 != QUOTE => {
+                return Some(Err(ScanError::CharacterExpectedClosing {
+                    actual: closing.1,
+                    span: Span::new(head.0, closing.0),
+                }));
+            }
+            Some(closing) => closing,
         };
-
-        // ...that is a quote
-        if closing.1 != QUOTE {
-            return Some(Err(ScanError::CharacterExpectedClosing {
-                actual: closing.1,
-                span: Span::new(head.0, closing.0),
-            }));
-        }
 
         Some(Ok(Token::new(
             TokenKind::Character(char.1),

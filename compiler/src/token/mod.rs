@@ -31,6 +31,7 @@ impl<'src> Iterator for Scanner<'src> {
         let head = self.trim()?;
 
         self.simple_tokens(head)
+            .or_else(|| self.double_simple_tokens(head))
             .or_else(|| self.number_literals(head))
             .or_else(|| self.character_literal(head))
             .or_else(|| self.string_literal(head))
@@ -90,6 +91,19 @@ impl<'src> Scanner<'src> {
         };
 
         Some(Ok(Token::new(kind, Span::new(head.0, head.0))))
+    }
+
+    fn double_simple_tokens(&mut self, head: Head) -> Option<ScanResult<'src>> {
+        let tail = self.chars.peek()?;
+
+        let kind = match (head.1, tail.1) {
+            ('-', '>') => TokenKind::Arrow,
+            (_, _) => return None,
+        };
+
+        let tail = self.chars.next()?;
+
+        Some(Ok(Token::new(kind, Span::new(head.0, tail.0))))
     }
 
     fn number_literals(&mut self, head: Head) -> Option<ScanResult<'src>> {

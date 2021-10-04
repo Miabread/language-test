@@ -41,6 +41,7 @@ pub enum TokenKind<'src> {
     Semicolon,
     DotSymbol,
     AtSymbol,
+    Arrow,
     Integer(i64),
     Character(char),
     String(&'src str),
@@ -64,6 +65,7 @@ impl Display for TokenKind<'_> {
                 Self::Semicolon => ";",
                 Self::DotSymbol => ".",
                 Self::AtSymbol => "@",
+                Self::Arrow => "->",
                 Self::Integer(it) => return write!(f, "{}", it),
                 Self::Character(it) => return write!(f, "'{}'", it),
                 Self::String(it) => return write!(f, r#""{}""#, it),
@@ -77,6 +79,8 @@ impl Display for TokenKind<'_> {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Keyword {
     Struct,
+    Func,
+    Let,
 }
 
 impl Display for Keyword {
@@ -86,6 +90,8 @@ impl Display for Keyword {
             "{}",
             match self {
                 Self::Struct => "struct",
+                Self::Func => "func",
+                Self::Let => "let",
             }
         )
     }

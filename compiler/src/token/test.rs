@@ -11,14 +11,15 @@ fn token(kind: TokenKind, Range { start, end }: Range<usize>) -> ScanResult {
 #[test]
 fn simple_tokens() {
     assert_eq!(
-        scan("( ) { } , ;").collect_vec(),
+        scan("( ) { } -> , ;").collect_vec(),
         vec![
             token(OpenParen, 0..0),
             token(CloseParen, 2..2),
             token(OpenBrace, 4..4),
             token(CloseBrace, 6..6),
-            token(Comma, 8..8),
-            token(Semicolon, 10..10),
+            token(Arrow, 8..9),
+            token(Comma, 11..11),
+            token(Semicolon, 13..13),
         ]
     );
 }

@@ -9,8 +9,7 @@
     "editor.semanticHighlighting.enabled": true,
     "files.eol": "\n",
     "cSpell.words": [
-        "itertools",
-        "Paren",
-        "Peekable"
+        "funcs",
+        "itertools"
     ]
 }

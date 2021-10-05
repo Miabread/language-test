@@ -1,5 +1,13 @@
-[workspace]
+[package]
+name = "language-test"
+version = "0.1.0"
+authors = ["jamesBeeProg <jamesBeeProg@gmail.com>"]
+edition = "2018"
 
-members = [
-    "compiler",
-]
+[dependencies]
+thiserror = "1.0"
+itertools = "0.10.0"
+lalrpop-util = "0.19.6"
+
+[build-dependencies]
+lalrpop = "0.19.6"
